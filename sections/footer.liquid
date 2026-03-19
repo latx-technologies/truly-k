@@ -1,56 +1,300 @@
-<footer>
-  <div class="footer__copyright">
-    &copy;
-    {{ 'now' | date: '%Y' }}
-    {{ shop.name | link_to: routes.root_url }}, {{ powered_by_link }}
+{{ 'footer.css' | asset_url | stylesheet_tag }}
+
+<footer class="site-footer full-width">
+  {%- comment -%} Contact info row {%- endcomment -%}
+  <div class="footer-contact">
+    <div class="footer-contact__inner">
+      <div class="footer-contact__item">
+        <span class="footer-contact__icon">{{ 'icon-chat.svg' | inline_asset_content }}</span>
+        <div>
+          <span class="footer-contact__label">Customer Service</span>
+          <span class="footer-contact__text">{{ section.settings.contact_hours | default: 'Mon-Sat, 9am-6pm EST' }}</span>
+        </div>
+      </div>
+      <div class="footer-contact__item">
+        <span class="footer-contact__icon">{{ 'icon-phone.svg' | inline_asset_content }}</span>
+        <div>
+          <span class="footer-contact__label">Call Us</span>
+          <a href="tel:{{ section.settings.phone | remove: ' ' | remove: '-' | remove: '(' | remove: ')' }}" class="footer-contact__text footer-contact__link">
+            {{ section.settings.phone | default: '+1 888-234-1234 (toll-free)' }}
+          </a>
+        </div>
+      </div>
+      <div class="footer-contact__item">
+        <span class="footer-contact__icon">{{ 'icon-mail.svg' | inline_asset_content }}</span>
+        <div>
+          <span class="footer-contact__label">Get in Touch</span>
+          <a href="mailto:{{ section.settings.email }}" class="footer-contact__text footer-contact__link">
+            {{ section.settings.email | default: 'touch@example.com' }}
+          </a>
+        </div>
+      </div>
+      <div class="footer-contact__item">
+        <span class="footer-contact__icon">{{ 'icon-map-pin.svg' | inline_asset_content }}</span>
+        <div>
+          <span class="footer-contact__label">Address</span>
+          <span class="footer-contact__text">{{ section.settings.address | default: '382 NE 191st St #87394 Miami' }}</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="footer__links">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
+  {%- comment -%} Newsletter + link columns {%- endcomment -%}
+  <div class="footer-main">
+    <div class="footer-main__inner">
+      <div class="footer-newsletter">
+        <h3 class="footer-newsletter__title">{{ section.settings.newsletter_heading | default: 'Join Our Newsletter' }}</h3>
+        <p class="footer-newsletter__text">{{ section.settings.newsletter_text | default: 'Sign up to our newsletter & receive 10% off your first order.' }}</p>
+        {% form 'customer', class: 'footer-newsletter__form' %}
+          {% if form.posted_successfully? %}
+            <p class="footer-newsletter__success">Thanks for subscribing!</p>
+          {% else %}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <input
+              type="email"
+              name="contact[email]"
+              class="footer-newsletter__input"
+              placeholder="{{ section.settings.newsletter_placeholder | default: 'Enter your email' }}"
+              required
+            >
+            <button type="submit" class="footer-newsletter__btn btn btn-primary--light">
+              {{ section.settings.newsletter_btn | default: 'Sign Up' }}
+            </button>
+          {% endif %}
+          <p class="footer-newsletter__consent">
+            {{ section.settings.newsletter_consent | default: 'By subscribing you agree to the' }}
+            <a href="{{ section.settings.terms_url | default: '/policies/terms-of-service' }}">Terms of Use</a>
+            &amp;
+            <a href="{{ section.settings.privacy_url | default: '/policies/privacy-policy' }}">Privacy Policy</a>.
+          </p>
+        {% endform %}
+      </div>
+
+      <div class="footer-links">
+        {%- assign menu_company = linklists[section.settings.menu_company] -%}
+        {% if menu_company and menu_company.links.size > 0 %}
+          <div class="footer-links__col">
+            <h4 class="footer-links__title">{{ menu_company.title | default: 'Company' }}</h4>
+            <ul class="footer-links__list">
+              {% for link in menu_company.links %}
+                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        {%- assign menu_collection = linklists[section.settings.menu_collection] -%}
+        {% if menu_collection and menu_collection.links.size > 0 %}
+          <div class="footer-links__col">
+            <h4 class="footer-links__title">{{ menu_collection.title | default: 'Collection' }}</h4>
+            <ul class="footer-links__list">
+              {% for link in menu_collection.links %}
+                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        {%- assign menu_shop = linklists[section.settings.menu_shop] -%}
+        {% if menu_shop and menu_shop.links.size > 0 %}
+          <div class="footer-links__col">
+            <h4 class="footer-links__title">{{ menu_shop.title | default: 'Shop' }}</h4>
+            <ul class="footer-links__list">
+              {% for link in menu_shop.links %}
+                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
 
-  <div class="footer__payment">
-    {% if section.settings.show_payment_icons %}
-      {% for type in shop.enabled_payment_types %}
-        {{ type | payment_type_svg_tag }}
-      {% endfor %}
-    {% endif %}
+  {%- comment -%} Bottom bar: locale, copyright, social, legal {%- endcomment -%}
+  <div class="footer-bottom">
+    <div class="footer-bottom__inner">
+      <div class="footer-bottom__left">
+        {% form 'localization', class: 'footer-locale' %}
+          {% if form.available_currencies.size > 1 %}
+            <div class="footer-locale__select">
+              <label for="footer-currency-{{ section.id }}" class="sr-only">Currency</label>
+              <select id="footer-currency-{{ section.id }}" name="currency" class="footer-locale__select-input">
+                {% for currency in form.available_currencies %}
+                  <option value="{{ currency.iso_code }}" {% if currency.iso_code == form.current_currency.iso_code %}selected{% endif %}>
+                    {{ currency.iso_code }} ({{ currency.symbol }})
+                  </option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="sr-only">Update currency</button>
+            </div>
+          {% endif %}
+        {% endform %}
+        <p class="footer-copyright">
+          &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. {{ powered_by_link }}
+        </p>
+      </div>
+      <div class="footer-bottom__right">
+        {% if section.settings.show_social %}
+          <div class="footer-social">
+            {% if section.settings.social_facebook != blank %}
+              <a href="{{ section.settings.social_facebook }}" target="_blank" rel="noopener" aria-label="Facebook">{{ 'icon-facebook.svg' | inline_asset_content }}</a>
+            {% endif %}
+            {% if section.settings.social_x != blank %}
+              <a href="{{ section.settings.social_x }}" target="_blank" rel="noopener" aria-label="X">{{ 'icon-x.svg' | inline_asset_content }}</a>
+            {% endif %}
+            {% if section.settings.social_instagram != blank %}
+              <a href="{{ section.settings.social_instagram }}" target="_blank" rel="noopener" aria-label="Instagram">{{ 'icon-instagram.svg' | inline_asset_content }}</a>
+            {% endif %}
+            {% if section.settings.social_tiktok != blank %}
+              <a href="{{ section.settings.social_tiktok }}" target="_blank" rel="noopener" aria-label="TikTok">{{ 'icon-tiktok.svg' | inline_asset_content }}</a>
+            {% endif %}
+          </div>
+        {% endif %}
+        <div class="footer-legal">
+          <a href="{{ section.settings.terms_url | default: '/policies/terms-of-service' }}">Terms of Service</a>
+          <a href="{{ section.settings.privacy_url | default: '/policies/privacy-policy' }}">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
   </div>
 </footer>
 
-{% stylesheet %}
-  footer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
-  }
-  footer a {
-    text-decoration: none;
-    color: var(--color-foreground);
-  }
-  footer .footer__links,
-  footer .footer__payment {
-    display: flex;
-    gap: 1rem;
-  }
-{% endstylesheet %}
+<script>
+  (function() {
+    var form = document.querySelector('.site-footer .footer-locale form');
+    var select = form && form.querySelector('select[name="currency"]');
+    if (form && select) {
+      select.addEventListener('change', function() { form.submit(); });
+    }
+  })();
+</script>
 
 {% schema %}
 {
-  "name": "t:general.footer",
+  "name": "Footer",
   "settings": [
     {
+      "type": "header",
+      "content": "Contact information"
+    },
+    {
+      "type": "text",
+      "id": "contact_hours",
+      "label": "Customer service hours",
+      "default": "Mon-Sat, 9am-6pm EST"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone number",
+      "default": "+1 888-234-1234 (toll-free)"
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "Email address",
+      "default": "touch@example.com"
+    },
+    {
+      "type": "textarea",
+      "id": "address",
+      "label": "Address",
+      "default": "382 NE 191st St #87394 Miami"
+    },
+    {
+      "type": "header",
+      "content": "Newsletter"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_heading",
+      "label": "Heading",
+      "default": "Join Our Newsletter"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_text",
+      "label": "Description",
+      "default": "Sign up to our newsletter & receive 10% off your first order."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_placeholder",
+      "label": "Email placeholder",
+      "default": "Enter your email"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_btn",
+      "label": "Button text",
+      "default": "Sign Up"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_consent",
+      "label": "Consent text (before links)",
+      "default": "By subscribing you agree to the"
+    },
+    {
+      "type": "header",
+      "content": "Link menus"
+    },
+    {
       "type": "link_list",
-      "id": "menu",
-      "label": "t:labels.menu"
+      "id": "menu_company",
+      "label": "Company menu"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_collection",
+      "label": "Collection menu"
+    },
+    {
+      "type": "link_list",
+      "id": "menu_shop",
+      "label": "Shop menu"
+    },
+    {
+      "type": "header",
+      "content": "Social links"
     },
     {
       "type": "checkbox",
-      "id": "show_payment_icons",
-      "label": "t:labels.show_payment_icons",
+      "id": "show_social",
+      "label": "Show social icons",
       "default": true
+    },
+    {
+      "type": "url",
+      "id": "social_facebook",
+      "label": "Facebook URL"
+    },
+    {
+      "type": "url",
+      "id": "social_x",
+      "label": "X (Twitter) URL"
+    },
+    {
+      "type": "url",
+      "id": "social_instagram",
+      "label": "Instagram URL"
+    },
+    {
+      "type": "url",
+      "id": "social_tiktok",
+      "label": "TikTok URL"
+    },
+    {
+      "type": "header",
+      "content": "Legal"
+    },
+    {
+      "type": "url",
+      "id": "terms_url",
+      "label": "Terms of Service URL"
+    },
+    {
+      "type": "url",
+      "id": "privacy_url",
+      "label": "Privacy Policy URL"
     }
   ]
 }

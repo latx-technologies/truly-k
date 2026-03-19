@@ -1,0 +1,88 @@
+/**
+ * Theme – Design tokens (variables only).
+ * Load this before global.css so components can reference these variables.
+ * TRULY K – Black & White Beauty Theme
+ */
+
+:root {
+  /* -------------------------------------------------------------------------
+     Colors
+     ------------------------------------------------------------------------- */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #0a0a0a;
+  --black: var(--color-black);
+  --white: var(--color-white);
+
+  /* Semantic aliases */
+  --color-text: var(--color-black);
+  --color-text-muted: var(--color-gray-600);
+  --color-background: var(--color-white);
+  --color-foreground: var(--color-black);
+  --color-border: var(--color-gray-200);
+  --color-error: #b91c1c;
+
+  /* -------------------------------------------------------------------------
+     Typography – font families
+     ------------------------------------------------------------------------- */
+  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-body: 'Syne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* -------------------------------------------------------------------------
+     Typography – font sizes (fluid scale)
+     ------------------------------------------------------------------------- */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.5rem;
+  --text-5xl: 3rem;
+
+  /* -------------------------------------------------------------------------
+     Transitions
+     ------------------------------------------------------------------------- */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.4s ease;
+  --transition-smooth: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* -------------------------------------------------------------------------
+     Buttons
+     ------------------------------------------------------------------------- */
+  --btn-padding-y: 18px;
+  --btn-padding-x: 40px;
+  --btn-font-size: var(--text-sm);
+  --btn-font-weight: 600;
+  --btn-letter-spacing: 0.1em;
+  --btn-border-width: 2px;
+  --btn-radius: 0;
+
+  /* -------------------------------------------------------------------------
+     Layout
+     ------------------------------------------------------------------------- */
+  --container-max-width: 1400px;
+  --container-padding: 60px;
+  --container-padding-tablet: 24px;
+}
+
+@media (max-width: 992px) {
+  :root {
+    --container-padding: var(--container-padding-tablet);
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --container-padding: var(--container-padding-tablet);
+  }
+}
