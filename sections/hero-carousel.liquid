@@ -1,7 +1,7 @@
 {{ 'section-hero-carousel.css' | asset_url | stylesheet_tag }}
 
 <section class="hero-carousel section-{{ section.id }}" aria-label="Hero slideshow">
-  <div class="hero-carousel__viewport">
+  <div class="hero-carousel__viewport container">
     {%- for block in section.blocks -%}
       <div
         class="hero-carousel__slide{% if forloop.first %} is-active{% endif %}"

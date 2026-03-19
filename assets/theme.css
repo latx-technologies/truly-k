@@ -70,10 +70,19 @@
   /* -------------------------------------------------------------------------
      Layout
      ------------------------------------------------------------------------- */
-  --container-max-width: 1400px;
-  --container-padding: 60px;
+  --container-max-width: 1440px;
+  --container-padding: 64px;
   --container-padding-tablet: 24px;
+  --container-padding-mobile: 20px;
+  --section-padding-top: 32px;
+  --section-padding-bottom: 32px;
 }
+
+@media (max-width: 1024px) {
+   :root {
+     --container-padding: 32px;
+   }
+ }
 
 @media (max-width: 992px) {
   :root {
@@ -83,6 +92,6 @@
 
 @media (max-width: 768px) {
   :root {
-    --container-padding: var(--container-padding-tablet);
+    --container-padding: var(--container-padding-mobile);
   }
 }
