@@ -1,0 +1,296 @@
+{{ 'section-hero-carousel.css' | asset_url | stylesheet_tag }}
+
+<section class="hero-carousel section-{{ section.id }}" aria-label="Hero slideshow">
+  <div class="hero-carousel__viewport">
+    {%- for block in section.blocks -%}
+      <div
+        class="hero-carousel__slide{% if forloop.first %} is-active{% endif %}"
+        {{ block.shopify_attributes }}
+        data-index="{{ forloop.index0 }}"
+        role="group"
+        aria-roledescription="slide"
+        aria-label="Slide {{ forloop.index }} of {{ section.blocks.size }}"
+      >
+
+        <div class="hero-carousel__content">
+          <div class="hero-carousel__content-inner">
+            {%- if block.settings.subtitle != blank -%}
+              <span class="hero-carousel__subtitle">
+                {{ block.settings.subtitle }}
+              </span>
+            {%- endif -%}
+
+            {%- if block.settings.heading != blank -%}
+              <h2 class="hero-carousel__heading">
+                {{ block.settings.heading }}
+              </h2>
+            {%- endif -%}
+
+            {%- if block.settings.description != blank -%}
+              <p class="hero-carousel__description">
+                {{ block.settings.description }}
+              </p>
+            {%- endif -%}
+
+            {%- if block.settings.button_label != blank -%}
+              <a
+                href="{{ block.settings.button_link }}"
+                class="btn btn-primary hero-carousel__btn"
+              >
+                <span>{{ block.settings.button_label }}</span>
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+
+        <div class="hero-carousel__media">
+          {%- if block.settings.image != blank -%}
+            {%- if forloop.first -%}
+              {{ block.settings.image | image_url: width: 1400 | image_tag:
+                loading: 'eager',
+                widths: '600, 900, 1200, 1400',
+                sizes: '(max-width: 768px) 100vw, 55vw',
+                class: 'hero-carousel__image'
+              }}
+            {%- else -%}
+              {{ block.settings.image | image_url: width: 1400 | image_tag:
+                loading: 'lazy',
+                widths: '600, 900, 1200, 1400',
+                sizes: '(max-width: 768px) 100vw, 55vw',
+                class: 'hero-carousel__image'
+              }}
+            {%- endif -%}
+          {%- else -%}
+            <div class="hero-carousel__placeholder">
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  {%- if section.blocks.size > 1 -%}
+    <div class="hero-carousel__controls">
+      <button class="hero-carousel__arrow hero-carousel__arrow--prev" aria-label="Previous slide">
+        {{ 'icon-chevron-left.svg' | inline_asset_content }}
+      </button>
+
+      <div class="hero-carousel__dots">
+        {%- for block in section.blocks -%}
+          <button
+            class="hero-carousel__dot{% if forloop.first %} is-active{% endif %}"
+            data-index="{{ forloop.index0 }}"
+            aria-label="Go to slide {{ forloop.index }}"
+          ></button>
+        {%- endfor -%}
+
+        <div class="hero-carousel__progress">
+          <div class="hero-carousel__progress-bar"></div>
+        </div>
+      </div>
+
+      <button class="hero-carousel__arrow hero-carousel__arrow--next" aria-label="Next slide">
+        {{ 'icon-chevron-right.svg' | inline_asset_content }}
+      </button>
+    </div>
+  {%- endif -%}
+</section>
+
+<script>
+  (function () {
+    var section = document.querySelector('.hero-carousel');
+    if (!section) return;
+
+    var slides = section.querySelectorAll('.hero-carousel__slide');
+    var dots = section.querySelectorAll('.hero-carousel__dot');
+    var prevBtn = section.querySelector('.hero-carousel__arrow--prev');
+    var nextBtn = section.querySelector('.hero-carousel__arrow--next');
+    var progressBar = section.querySelector('.hero-carousel__progress-bar');
+    var current = 0;
+    var total = slides.length;
+    var autoplayDelay = {{ section.settings.autoplay_speed | default: 6 }} * 1000;
+    var autoplay = {{ section.settings.autoplay | default: true }};
+    var timer = null;
+    var isTransitioning = false;
+
+    function goTo(index) {
+      if (isTransitioning || index === current) return;
+      isTransitioning = true;
+
+      slides[current].classList.remove('is-active');
+      slides[current].classList.add('is-leaving');
+      if (dots[current]) dots[current].classList.remove('is-active');
+
+      current = (index + total) % total;
+
+      slides[current].classList.add('is-active');
+      if (dots[current]) dots[current].classList.add('is-active');
+
+      resetProgress();
+
+      setTimeout(function () {
+        slides.forEach(function (s) { s.classList.remove('is-leaving'); });
+        isTransitioning = false;
+      }, 800);
+    }
+
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    function resetProgress() {
+      if (!progressBar) return;
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          progressBar.style.transition = 'width ' + (autoplayDelay / 1000) + 's linear';
+          progressBar.style.width = '100%';
+        });
+      });
+    }
+
+    function startAutoplay() {
+      if (!autoplay || total <= 1) return;
+      stopAutoplay();
+      resetProgress();
+      timer = setInterval(next, autoplayDelay);
+    }
+
+    function stopAutoplay() {
+      clearInterval(timer);
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', function () { stopAutoplay(); prev(); startAutoplay(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { stopAutoplay(); next(); startAutoplay(); });
+
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () {
+        stopAutoplay();
+        goTo(parseInt(this.getAttribute('data-index'), 10));
+        startAutoplay();
+      });
+    });
+
+    /* Pause on hover */
+    section.addEventListener('mouseenter', stopAutoplay);
+    section.addEventListener('mouseleave', startAutoplay);
+
+    /* Touch swipe */
+    var touchStartX = 0;
+    section.addEventListener('touchstart', function (e) { touchStartX = e.touches[0].clientX; }, { passive: true });
+    section.addEventListener('touchend', function (e) {
+      var diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) {
+        stopAutoplay();
+        diff > 0 ? next() : prev();
+        startAutoplay();
+      }
+    }, { passive: true });
+
+    startAutoplay();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Hero Carousel",
+  "tag": "section",
+  "class": "section-hero-carousel",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Seconds per slide",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 6,
+      "unit": "s"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "New Collection"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Nurturing Your Creative Spirit"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Our industry-leading standards for product safety give you the power to make better."
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Carousel",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "subtitle": "New Collection",
+            "heading": "Nurturing Your Creative Spirit",
+            "description": "Our industry-leading standards for product safety give you the power to make better.",
+            "button_label": "Shop Now"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "subtitle": "Best Sellers",
+            "heading": "Elegance In Every Detail",
+            "description": "Discover our curated selection of premium beauty essentials crafted for you.",
+            "button_label": "Explore"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "subtitle": "Limited Edition",
+            "heading": "Where Beauty Meets Science",
+            "description": "Formulated with the finest ingredients for visible, lasting results.",
+            "button_label": "Shop Collection"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

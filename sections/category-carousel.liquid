@@ -1,0 +1,208 @@
+{{ 'section-category-carousel.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign cat_count = 0
+  if section.blocks.size > 0
+    for block in section.blocks
+      if block.settings.collection != blank
+        assign cat_count = cat_count | plus: 1
+      endif
+    endfor
+  endif
+
+  assign has_manual = false
+  if cat_count > 0
+    assign has_manual = true
+  endif
+-%}
+
+<section class="cat-carousel section-{{ section.id }}">
+  <div class="container">
+
+    {%- if section.settings.heading != blank -%}
+      <div class="cat-carousel__header">
+        {%- if section.settings.subtitle != blank -%}
+          <span class="cat-carousel__subtitle text-small-uppercase">{{ section.settings.subtitle }}</span>
+        {%- endif -%}
+        <h2 class="cat-carousel__heading heading-section">{{ section.settings.heading }}</h2>
+      </div>
+    {%- endif -%}
+
+    <div class="cat-carousel__track-wrapper">
+      <div class="cat-carousel__fade cat-carousel__fade--left"></div>
+
+      <div class="cat-carousel__track">
+
+        {%- if has_manual -%}
+          {%- for block in section.blocks -%}
+            {%- if block.settings.collection != blank -%}
+              {%- assign col = block.settings.collection -%}
+              <a href="{{ col.url }}" class="cat-carousel__item" {{ block.shopify_attributes }}>
+                <div class="cat-carousel__circle">
+                  {%- if col.image -%}
+                    {{ col.image | image_url: width: 300 | image_tag:
+                      loading: 'lazy',
+                      widths: '150, 200, 300',
+                      class: 'cat-carousel__img'
+                    }}
+                  {%- elsif col.products.first and col.products.first.featured_image -%}
+                    {{ col.products.first.featured_image | image_url: width: 300 | image_tag:
+                      loading: 'lazy',
+                      widths: '150, 200, 300',
+                      class: 'cat-carousel__img'
+                    }}
+                  {%- else -%}
+                    <div class="cat-carousel__placeholder">
+                      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {%- endif -%}
+                </div>
+                <span class="cat-carousel__label">{{ col.title }}</span>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+
+        {%- else -%}
+          {%- for col in collections -%}
+            {%- if col.handle == 'all' -%}{%- continue -%}{%- endif -%}
+            {%- if section.settings.show_sale_category == false and col.handle == 'sale' -%}{%- continue -%}{%- endif -%}
+            <a href="{{ col.url }}" class="cat-carousel__item">
+              <div class="cat-carousel__circle">
+                {%- if col.image -%}
+                  {{ col.image | image_url: width: 300 | image_tag:
+                    loading: 'lazy',
+                    widths: '150, 200, 300',
+                    class: 'cat-carousel__img'
+                  }}
+                {%- elsif col.products.first and col.products.first.featured_image -%}
+                  {{ col.products.first.featured_image | image_url: width: 300 | image_tag:
+                    loading: 'lazy',
+                    widths: '150, 200, 300',
+                    class: 'cat-carousel__img'
+                  }}
+                {%- else -%}
+                  <div class="cat-carousel__placeholder">
+                    {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                {%- endif -%}
+              </div>
+              <span class="cat-carousel__label">{{ col.title }}</span>
+            </a>
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- if has_manual and section.settings.show_sale_category and collections['sale'] != blank -%}
+          {%- assign sale_col = collections['sale'] -%}
+          <a href="{{ sale_col.url }}" class="cat-carousel__item cat-carousel__item--sale">
+            <div class="cat-carousel__circle">
+              {%- if sale_col.image -%}
+                {{ sale_col.image | image_url: width: 300 | image_tag:
+                  loading: 'lazy',
+                  widths: '150, 200, 300',
+                  class: 'cat-carousel__img'
+                }}
+              {%- elsif sale_col.products.first and sale_col.products.first.featured_image -%}
+                {{ sale_col.products.first.featured_image | image_url: width: 300 | image_tag:
+                  loading: 'lazy',
+                  widths: '150, 200, 300',
+                  class: 'cat-carousel__img'
+                }}
+              {%- else -%}
+                <div class="cat-carousel__placeholder">
+                  {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
+              {%- endif -%}
+            </div>
+            <span class="cat-carousel__label">Sale</span>
+          </a>
+        {%- endif -%}
+
+      </div>
+
+      <div class="cat-carousel__fade cat-carousel__fade--right"></div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  (function () {
+    var section = document.querySelector('.cat-carousel.section-{{ section.id }}');
+    if (!section) return;
+
+    var track = section.querySelector('.cat-carousel__track');
+    var fadeL = section.querySelector('.cat-carousel__fade--left');
+    var fadeR = section.querySelector('.cat-carousel__fade--right');
+
+    function updateFades() {
+      var sl = track.scrollLeft;
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      fadeL.classList.toggle('is-visible', sl > 8);
+      fadeR.classList.toggle('is-visible', sl < maxScroll - 8);
+    }
+
+    track.addEventListener('scroll', updateFades, { passive: true });
+    updateFades();
+    window.addEventListener('resize', updateFades);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Category Carousel",
+  "tag": "section",
+  "class": "section-category-carousel",
+  "max_blocks": 16,
+  "settings": [
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by Category"
+    },
+    {
+      "type": "header",
+      "content": "Sale category"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sale_category",
+      "label": "Show 'Sale' category",
+      "default": true,
+      "info": "Displays a Sale circle at the end. Requires a collection with the handle 'sale'."
+    },
+    {
+      "type": "header",
+      "content": "Categories"
+    },
+    {
+      "type": "paragraph",
+      "content": "Add blocks below to pick specific categories. Leave empty to auto-show all collections."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category Carousel",
+      "blocks": []
+    }
+  ]
+}
+{% endschema %}
