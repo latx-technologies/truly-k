@@ -212,8 +212,8 @@ p {
   max-width: var(--container-max-width);
   margin-left: auto;
   margin-right: auto;
-  /* padding-left: var(--container-padding);
-  padding-right: var(--container-padding); */
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
 }
 
 .btn {

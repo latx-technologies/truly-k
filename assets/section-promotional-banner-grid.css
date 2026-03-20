@@ -1,0 +1,238 @@
+.promotional-banner-grid {
+  padding: 60px 0;
+}
+
+.promotional-banner-grid__row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.promotional-banner-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+}
+
+.promotional-banner-card__image-wrapper {
+  position: absolute;
+  inset: 0;
+}
+
+.promotional-banner-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.promotional-banner-card:hover .promotional-banner-card__image {
+  transform: scale(1.04);
+}
+
+.promotional-banner-card__image-wrapper--placeholder {
+  background: var(--color-gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.promotional-banner-card__image-wrapper--placeholder svg {
+  width: 30%;
+  opacity: 0.2;
+}
+
+.promotional-banner-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  transition: background 0.4s ease;
+}
+
+.promotional-banner-card:hover .promotional-banner-card__overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.15) 50%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+}
+
+.promotional-banner-card__content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 70%;
+}
+
+.promotional-banner-card__subtitle {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-white);
+  opacity: 0.85;
+}
+
+.promotional-banner-card__heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-white);
+  margin: 0;
+}
+
+.promotional-banner-card__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--color-white);
+  color: var(--color-black);
+  border-radius: 100px;
+  align-self: flex-start;
+  margin-top: 6px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.promotional-banner-card:hover .promotional-banner-card__button {
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+.promotional-banner-card__discount-badge {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 3;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.promotional-banner-card__discount-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-gray-500);
+  line-height: 1;
+}
+
+.promotional-banner-card__discount-value {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  color: var(--color-black);
+  line-height: 1.1;
+}
+
+.promotional-banner-grid__row:has(.promotional-banner-card:only-child) {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 992px) {
+  .promotional-banner-card {
+    aspect-ratio: 16 / 10;
+  }
+
+  .promotional-banner-card__content {
+    padding: 24px;
+    max-width: 80%;
+  }
+
+  .promotional-banner-card__heading {
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+  }
+
+  .promotional-banner-card__discount-badge {
+    width: 68px;
+    height: 68px;
+    top: 16px;
+    right: 16px;
+  }
+
+  .promotional-banner-card__discount-value {
+    font-size: var(--text-xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .promotional-banner-grid {
+    padding: 40px 0;
+  }
+
+  .promotional-banner-grid__row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .promotional-banner-card {
+    aspect-ratio: 16 / 9;
+  }
+
+  .promotional-banner-card__content {
+    padding: 20px;
+    max-width: 75%;
+  }
+
+  .promotional-banner-card__button {
+    padding: 10px 22px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .promotional-banner-card {
+    aspect-ratio: 4 / 3;
+    border-radius: 6px;
+  }
+
+  .promotional-banner-card__heading {
+    font-size: 1.25rem;
+  }
+
+  .promotional-banner-card__discount-badge {
+    width: 60px;
+    height: 60px;
+    top: 12px;
+    right: 12px;
+  }
+
+  .promotional-banner-card__discount-label {
+    font-size: 9px;
+  }
+
+  .promotional-banner-card__discount-value {
+    font-size: var(--text-lg);
+  }
+}

@@ -1,0 +1,137 @@
+{{ 'section-promotional-banner-grid.css' | asset_url | stylesheet_tag }}
+
+<section class="promotional-banner-grid section-{{ section.id }}">
+  <div class="container">
+    <div class="promotional-banner-grid__row">
+
+      {%- for block in section.blocks -%}
+        <a href="{{ block.settings.button_link | default: '#' }}" class="promotional-banner-card" {{ block.shopify_attributes }}>
+
+          {%- if block.settings.image != blank -%}
+            <div class="promotional-banner-card__image-wrapper">
+              {{ block.settings.image | image_url: width: 1000 | image_tag:
+                loading: 'lazy',
+                widths: '500, 700, 1000',
+                sizes: '(max-width: 768px) 100vw, 50vw',
+                class: 'promotional-banner-card__image'
+              }}
+            </div>
+          {%- else -%}
+            <div class="promotional-banner-card__image-wrapper promotional-banner-card__image-wrapper--placeholder">
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          {%- endif -%}
+
+          <div class="promotional-banner-card__overlay"></div>
+
+          <div class="promotional-banner-card__content">
+            {%- if block.settings.subtitle != blank -%}
+              <span class="promotional-banner-card__subtitle">
+                {{ block.settings.subtitle }}
+              </span>
+            {%- endif -%}
+
+            {%- if block.settings.heading != blank -%}
+              <h3 class="promotional-banner-card__heading">
+                {{ block.settings.heading }}
+              </h3>
+            {%- endif -%}
+
+            {%- if block.settings.button_label != blank -%}
+              <span class="promotional-banner-card__button">
+                {{ block.settings.button_label }}
+              </span>
+            {%- endif -%}
+          </div>
+
+          {%- if block.settings.discount_text != blank -%}
+            <div class="promotional-banner-card__discount-badge">
+              <span class="promotional-banner-card__discount-label">Save</span>
+              <span class="promotional-banner-card__discount-value">{{ block.settings.discount_text }}</span>
+            </div>
+          {%- endif -%}
+
+        </a>
+      {%- endfor -%}
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Promotional Banners",
+  "tag": "section",
+  "class": "section-promotional-banner-grid",
+  "max_blocks": 4,
+  "settings": [],
+  "blocks": [
+    {
+      "type": "banner",
+      "name": "Banner",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Background image"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "Holiday Gifts"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Cleansing Set For Sensitive Skin"
+        },
+        {
+          "type": "text",
+          "id": "discount_text",
+          "label": "Discount badge text",
+          "info": "e.g. 40% — leave empty to hide the badge",
+          "default": "40%"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promotional Banners",
+      "blocks": [
+        {
+          "type": "banner",
+          "settings": {
+            "subtitle": "Holiday Gifts",
+            "heading": "Cleansing Set For Sensitive Skin",
+            "discount_text": "40%",
+            "button_label": "Shop Now"
+          }
+        },
+        {
+          "type": "banner",
+          "settings": {
+            "subtitle": "Holiday Gifts",
+            "heading": "Pastel Bathroom Coutertop",
+            "discount_text": "30%",
+            "button_label": "Shop Now"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

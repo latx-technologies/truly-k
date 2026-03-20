@@ -166,7 +166,6 @@
 .hero-carousel__controls {
   position: absolute;
   bottom: 48px;
-  left: var(--container-padding);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -242,7 +241,6 @@
   content: '';
   position: absolute;
   top: 60px;
-  left: var(--container-padding);
   width: 40px;
   height: 1px;
   background: var(--color-gray-300);

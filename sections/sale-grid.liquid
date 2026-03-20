@@ -1,0 +1,400 @@
+{{ 'section-sale-grid.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign end_date = section.settings.countdown_date | default: ''
+  assign end_time = section.settings.countdown_time | default: '00:00'
+  assign end_datetime = end_date | append: 'T' | append: end_time | append: ':00'
+  assign hide_expired = section.settings.hide_after_expired
+-%}
+
+<section
+  class="sale-grid section-{{ section.id }}"
+  {% if hide_expired and end_date != blank %}
+    data-expires="{{ end_datetime }}"
+    data-hide-expired="true"
+  {% endif %}
+>
+  <div class="container">
+
+    {%- if section.settings.heading != blank -%}
+      <div class="sale-grid__top">
+        <h2 class="sale-grid__heading">
+          {{ section.settings.heading }}
+        </h2>
+
+        {%- if section.settings.show_badges -%}
+          <div class="sale-grid__badges">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'badge' and block.settings.badge_text != blank -%}
+                <span class="sale-grid__badge" {{ block.shopify_attributes }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  {{ block.settings.badge_text }}
+                </span>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="sale-grid__layout">
+
+      <div class="sale-grid__timer-card">
+        {%- if section.settings.timer_image != blank -%}
+          {{ section.settings.timer_image | image_url: width: 800 | image_tag:
+            loading: 'lazy',
+            widths: '400, 600, 800',
+            class: 'sale-grid__timer-bg'
+          }}
+        {%- endif -%}
+        <div class="sale-grid__timer-overlay"></div>
+        <div class="sale-grid__timer-content">
+          {%- if section.settings.timer_subtitle != blank -%}
+            <span class="sale-grid__timer-subtitle">{{ section.settings.timer_subtitle }}</span>
+          {%- endif -%}
+          {%- if section.settings.timer_heading != blank -%}
+            <h3 class="sale-grid__timer-heading">{{ section.settings.timer_heading }}</h3>
+          {%- endif -%}
+
+          {%- if end_date != blank -%}
+            <div class="sale-grid__countdown" data-end="{{ end_datetime }}">
+              <div class="sale-grid__countdown-unit">
+                <span class="sale-grid__countdown-num" data-days>00</span>
+                <span class="sale-grid__countdown-label">Days</span>
+              </div>
+              <span class="sale-grid__countdown-sep">:</span>
+              <div class="sale-grid__countdown-unit">
+                <span class="sale-grid__countdown-num" data-hours>00</span>
+                <span class="sale-grid__countdown-label">Hrs</span>
+              </div>
+              <span class="sale-grid__countdown-sep">:</span>
+              <div class="sale-grid__countdown-unit">
+                <span class="sale-grid__countdown-num" data-mins>00</span>
+                <span class="sale-grid__countdown-label">Min</span>
+              </div>
+              <span class="sale-grid__countdown-sep">:</span>
+              <div class="sale-grid__countdown-unit">
+                <span class="sale-grid__countdown-num" data-secs>00</span>
+                <span class="sale-grid__countdown-label">Sec</span>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.timer_button_label != blank -%}
+            <a href="{{ section.settings.timer_button_link | default: '/collections/sale' }}" class="sale-grid__timer-btn">
+              <span>{{ section.settings.timer_button_label }}</span>
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="sale-grid__categories">
+        {%- for block in section.blocks -%}
+
+          {%- if block.type == 'category' -%}
+            {%- assign col = block.settings.collection -%}
+            {%- if col != blank -%}
+              <a href="{{ col.url }}" class="sale-grid__cat-card" {{ block.shopify_attributes }}>
+                <div class="sale-grid__cat-image">
+                  {%- if block.settings.custom_image != blank -%}
+                    {{ block.settings.custom_image | image_url: width: 400 | image_tag:
+                      loading: 'lazy',
+                      widths: '200, 300, 400',
+                      class: 'sale-grid__cat-img'
+                    }}
+                  {%- elsif col.image -%}
+                    {{ col.image | image_url: width: 400 | image_tag:
+                      loading: 'lazy',
+                      widths: '200, 300, 400',
+                      class: 'sale-grid__cat-img'
+                    }}
+                  {%- elsif col.products.first and col.products.first.featured_image -%}
+                    {{ col.products.first.featured_image | image_url: width: 400 | image_tag:
+                      loading: 'lazy',
+                      widths: '200, 300, 400',
+                      class: 'sale-grid__cat-img'
+                    }}
+                  {%- else -%}
+                    <div class="sale-grid__cat-placeholder">
+                      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {%- endif -%}
+                </div>
+                <span class="sale-grid__cat-name">
+                  {%- if block.settings.custom_label != blank -%}
+                    {{ block.settings.custom_label }}
+                  {%- else -%}
+                    {{ col.title }}
+                  {%- endif -%}
+                </span>
+              </a>
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if block.type == 'product' -%}
+            {%- assign prod = block.settings.product -%}
+            {%- if prod != blank -%}
+              <a href="{{ prod.url }}" class="sale-grid__cat-card sale-grid__cat-card--product" {{ block.shopify_attributes }}>
+                <div class="sale-grid__cat-image">
+                  {%- if block.settings.custom_image != blank -%}
+                    {{ block.settings.custom_image | image_url: width: 400 | image_tag:
+                      loading: 'lazy',
+                      widths: '200, 300, 400',
+                      class: 'sale-grid__cat-img'
+                    }}
+                  {%- elsif prod.featured_image -%}
+                    {{ prod.featured_image | image_url: width: 400 | image_tag:
+                      loading: 'lazy',
+                      widths: '200, 300, 400',
+                      class: 'sale-grid__cat-img'
+                    }}
+                  {%- else -%}
+                    <div class="sale-grid__cat-placeholder">
+                      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {%- endif -%}
+                </div>
+                <span class="sale-grid__cat-name">
+                  {%- if block.settings.custom_label != blank -%}
+                    {{ block.settings.custom_label }}
+                  {%- else -%}
+                    {{ prod.title }}
+                  {%- endif -%}
+                </span>
+                {%- if prod.compare_at_price > prod.price -%}
+                  <span class="sale-grid__cat-price">
+                    <span class="sale-grid__cat-price--sale">{{ prod.price | money }}</span>
+                    <span class="sale-grid__cat-price--was">{{ prod.compare_at_price | money }}</span>
+                  </span>
+                {%- else -%}
+                  <span class="sale-grid__cat-price">
+                    <span class="sale-grid__cat-price--sale">{{ prod.price | money }}</span>
+                  </span>
+                {%- endif -%}
+              </a>
+            {%- endif -%}
+          {%- endif -%}
+
+        {%- endfor -%}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var sectionEl = document.querySelector('.sale-grid.section-{{ section.id }}');
+  if (!sectionEl) return;
+
+  var countdownEl = sectionEl.querySelector('.sale-grid__countdown');
+  var hideExpired = sectionEl.getAttribute('data-hide-expired') === 'true';
+  var expiresAt = sectionEl.getAttribute('data-expires');
+
+  if (hideExpired && expiresAt) {
+    var endMs = new Date(expiresAt).getTime();
+    if (Date.now() >= endMs) {
+      sectionEl.style.display = 'none';
+      return;
+    }
+  }
+
+  if (!countdownEl) return;
+
+  var endDate = new Date(countdownEl.getAttribute('data-end')).getTime();
+  var daysEl = countdownEl.querySelector('[data-days]');
+  var hoursEl = countdownEl.querySelector('[data-hours]');
+  var minsEl = countdownEl.querySelector('[data-mins]');
+  var secsEl = countdownEl.querySelector('[data-secs]');
+  var interval;
+
+  function pad(n) { return n < 10 ? '0' + n : n; }
+
+  function tick() {
+    var now = Date.now();
+    var diff = endDate - now;
+
+    if (diff <= 0) {
+      daysEl.textContent = '00';
+      hoursEl.textContent = '00';
+      minsEl.textContent = '00';
+      secsEl.textContent = '00';
+      clearInterval(interval);
+
+      if (hideExpired) {
+        sectionEl.style.transition = 'opacity 0.6s ease';
+        sectionEl.style.opacity = '0';
+        setTimeout(function () {
+          sectionEl.style.display = 'none';
+        }, 600);
+      }
+      return;
+    }
+
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    var s = Math.floor((diff % 60000) / 1000);
+
+    daysEl.textContent = pad(d);
+    hoursEl.textContent = pad(h);
+    minsEl.textContent = pad(m);
+    secsEl.textContent = pad(s);
+  }
+
+  tick();
+  interval = setInterval(tick, 1000);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Sale Grid + Timer",
+  "tag": "section",
+  "class": "section-sale-grid",
+  "max_blocks": 24,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Take the time you deserve, and let beauty shine within you"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_badges",
+      "label": "Show trust badges",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Countdown Timer"
+    },
+    {
+      "type": "image_picker",
+      "id": "timer_image",
+      "label": "Background image"
+    },
+    {
+      "type": "text",
+      "id": "timer_subtitle",
+      "label": "Subtitle",
+      "default": "Countdown Is On"
+    },
+    {
+      "type": "text",
+      "id": "timer_heading",
+      "label": "Heading",
+      "default": "Holiday Season Sale"
+    },
+    {
+      "type": "text",
+      "id": "countdown_date",
+      "label": "End date",
+      "info": "Format: YYYY-MM-DD (e.g. 2026-04-30)",
+      "default": "2026-04-30"
+    },
+    {
+      "type": "text",
+      "id": "countdown_time",
+      "label": "End time",
+      "info": "Format: HH:MM in 24-hour (e.g. 23:59 for 11:59 PM)",
+      "default": "23:59"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_after_expired",
+      "label": "Hide section after timer ends",
+      "default": true,
+      "info": "Automatically hides the entire section once the countdown reaches zero."
+    },
+    {
+      "type": "text",
+      "id": "timer_button_label",
+      "label": "Button label",
+      "default": "Shop The Sale"
+    },
+    {
+      "type": "url",
+      "id": "timer_button_link",
+      "label": "Button link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "badge",
+      "name": "Trust Badge",
+      "settings": [
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Text",
+          "default": "Free Shipping"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "custom_label",
+          "label": "Custom label (optional)",
+          "info": "Overrides the collection title"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_image",
+          "label": "Custom image (optional)",
+          "info": "Overrides the collection image"
+        }
+      ]
+    },
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "text",
+          "id": "custom_label",
+          "label": "Custom label (optional)",
+          "info": "Overrides the product title"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_image",
+          "label": "Custom image (optional)",
+          "info": "Overrides the product image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sale Grid + Timer",
+      "blocks": [
+        { "type": "badge", "settings": { "badge_text": "Free Shipping" } },
+        { "type": "badge", "settings": { "badge_text": "Money Guarantee" } },
+        { "type": "badge", "settings": { "badge_text": "Flexible Payment" } },
+        { "type": "badge", "settings": { "badge_text": "Online Support" } },
+        { "type": "badge", "settings": { "badge_text": "Return Within 7 Days" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
