@@ -11,6 +11,13 @@
   "sections": {
     "main": {
       "type": "product",
+      "blocks": {
+        "specs": { "type": "pdp-specs", "settings": {} },
+        "howto": { "type": "pdp-howto", "settings": {} },
+        "reviews": { "type": "pdp-reviews", "settings": {} },
+        "ritual": { "type": "pdp-ritual", "settings": {} }
+      },
+      "block_order": ["specs", "howto", "reviews", "ritual"],
       "settings": {}
     }
   },

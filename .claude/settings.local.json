@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('d:/TRULY-K/Truly-K \\(DEV\\)/locales/en.default.schema.json','utf8'\\).replace\\(/^\\\\/\\\\*[\\\\s\\\\S]*?\\\\*\\\\//,''\\)\\); console.log\\('schema OK'\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('d:/TRULY-K/Truly-K \\(DEV\\)/locales/en.default.json','utf8'\\).replace\\(/^\\\\/\\\\*[\\\\s\\\\S]*?\\\\*\\\\//,''\\)\\); console.log\\('locale OK'\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('d:/TRULY-K/Truly-K \\(DEV\\)/templates/product.json','utf8'\\).replace\\(/^\\\\/\\\\*[\\\\s\\\\S]*?\\\\*\\\\//,''\\)\\); console.log\\('template OK'\\)\")"
+    ]
+  }
+}

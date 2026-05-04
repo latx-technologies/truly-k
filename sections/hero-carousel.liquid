@@ -1,6 +1,9 @@
-{{ 'section-hero-carousel.css' | asset_url | stylesheet_tag }}
-
-<section class="hero-carousel section-{{ section.id }}" aria-label="Hero slideshow">
+<section
+  class="hero-carousel"
+  aria-label="Hero slideshow"
+  data-autoplay="{{ section.settings.autoplay }}"
+  data-autoplay-speed="{{ section.settings.autoplay_speed | default: 6 }}"
+>
   <div class="hero-carousel__viewport container">
     {%- for block in section.blocks -%}
       <div
@@ -73,25 +76,25 @@
   <div class="container">
     {%- if section.blocks.size > 1 -%}
       <div class="hero-carousel__controls">
-        <button class="hero-carousel__arrow hero-carousel__arrow--prev" aria-label="Previous slide">
+        <button class="hero-carousel__arrow hero-carousel__arrow--prev" aria-label="{{ 'carousel.previous' | t }}">
           {{ 'icon-chevron-left.svg' | inline_asset_content }}
         </button>
-  
+
         <div class="hero-carousel__dots">
           {%- for block in section.blocks -%}
             <button
               class="hero-carousel__dot{% if forloop.first %} is-active{% endif %}"
               data-index="{{ forloop.index0 }}"
-              aria-label="Go to slide {{ forloop.index }}"
+              aria-label="{{ 'carousel.go_to_slide' | t: index: forloop.index }}"
             ></button>
           {%- endfor -%}
-  
+
           <div class="hero-carousel__progress">
             <div class="hero-carousel__progress-bar"></div>
           </div>
         </div>
-  
-        <button class="hero-carousel__arrow hero-carousel__arrow--next" aria-label="Next slide">
+
+        <button class="hero-carousel__arrow hero-carousel__arrow--next" aria-label="{{ 'carousel.next' | t }}">
           {{ 'icon-chevron-right.svg' | inline_asset_content }}
         </button>
       </div>
@@ -99,10 +102,194 @@
   </div>
 </section>
 
-<script>
-  (function () {
-    var section = document.querySelector('.hero-carousel');
-    if (!section) return;
+{% stylesheet %}
+.hero-carousel {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-white);
+}
+.hero-carousel__viewport { position: relative; min-height: auto; }
+.hero-carousel__slide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 0.8s;
+  z-index: 0;
+}
+.hero-carousel__slide.is-active {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 0s;
+  z-index: 2;
+}
+.hero-carousel__slide.is-leaving { position: absolute; opacity: 0; visibility: visible; z-index: 1; }
+.hero-carousel__content { display: flex; align-items: center; padding: 80px var(--container-padding) 120px 0; position: relative; }
+.hero-carousel__content-inner { max-width: 520px; }
+.hero-carousel__subtitle {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-gray-600);
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+}
+.hero-carousel__slide.is-active .hero-carousel__subtitle {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
+}
+.hero-carousel__heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 5.5vw, 4.5rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--color-black);
+  margin-bottom: 24px;
+  opacity: 0;
+  transform: translateY(30px);
+}
+.hero-carousel__slide.is-active .hero-carousel__heading {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.7s ease 0.35s, transform 0.7s ease 0.35s;
+}
+.hero-carousel__description {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-gray-500);
+  max-width: 380px;
+  margin-bottom: 36px;
+  opacity: 0;
+  transform: translateY(20px);
+}
+.hero-carousel__slide.is-active .hero-carousel__description {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease 0.5s, transform 0.6s ease 0.5s;
+}
+.hero-carousel__btn { opacity: 0; transform: translateY(16px); }
+.hero-carousel__slide.is-active .hero-carousel__btn {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease 0.65s, transform 0.5s ease 0.65s,
+              background-color var(--transition-medium),
+              color var(--transition-medium),
+              border-color var(--transition-medium);
+}
+.hero-carousel__media { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.hero-carousel__image {
+  width: 100%;
+  height: auto;
+  max-height: 520px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border-radius: 1.75rem;
+}
+.hero-carousel__slide.is-active .hero-carousel__image {
+  animation: heroImageReveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes heroImageReveal {
+  from { transform: scale(1.06); opacity: 0.7; }
+  to { transform: scale(1); opacity: 1; }
+}
+.hero-carousel__placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  background: var(--color-gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-carousel__placeholder svg { width: 60%; opacity: 0.3; }
+.hero-carousel__controls {
+  position: absolute;
+  bottom: 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 10;
+}
+.hero-carousel__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  color: var(--color-black);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  padding: 0;
+}
+.hero-carousel__arrow:hover { color: var(--color-gray-500); }
+.hero-carousel__arrow svg { pointer-events: none; }
+.hero-carousel__dots { display: flex; align-items: center; gap: 10px; position: relative; }
+.hero-carousel__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-gray-400);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: var(--transition-fast);
+}
+.hero-carousel__dot.is-active { background: var(--color-black); border-color: var(--color-black); }
+.hero-carousel__dot:hover:not(.is-active) { border-color: var(--color-gray-600); }
+.hero-carousel__progress {
+  width: 48px;
+  height: 6px;
+  background: var(--color-gray-200);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-left: 4px;
+}
+.hero-carousel__progress-bar { height: 100%; width: 0%; background: var(--color-black); border-radius: 2px; }
+.hero-carousel__content::before {
+  content: '';
+  position: absolute;
+  top: 60px;
+  width: 40px;
+  height: 1px;
+  background: var(--color-gray-300);
+}
+@media (max-width: 992px) {
+  .hero-carousel__viewport { min-height: auto; }
+  .hero-carousel__slide { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .hero-carousel__media { order: -1; padding-right: 0; }
+  .hero-carousel__image { border-radius: 0; }
+  .hero-carousel__content { padding: 40px var(--container-padding) 100px; }
+  .hero-carousel__content::before { display: none; }
+  .hero-carousel__heading { font-size: clamp(2.25rem, 7vw, 3.25rem); }
+  .hero-carousel__controls { bottom: 28px; }
+}
+@media (max-width: 480px) {
+  .hero-carousel__content { padding: 28px 20px 90px; }
+  .hero-carousel__description { font-size: var(--text-sm); }
+  .hero-carousel__controls { left: 20px; bottom: 20px; gap: 10px; }
+  .hero-carousel__progress { width: 36px; }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  document.querySelectorAll('.hero-carousel').forEach(initHero);
+
+  function initHero(section) {
+    if (section.dataset.heroInit === '1') return;
+    section.dataset.heroInit = '1';
 
     var slides = section.querySelectorAll('.hero-carousel__slide');
     var dots = section.querySelectorAll('.hero-carousel__dot');
@@ -111,26 +298,21 @@
     var progressBar = section.querySelector('.hero-carousel__progress-bar');
     var current = 0;
     var total = slides.length;
-    var autoplayDelay = {{ section.settings.autoplay_speed | default: 6 }} * 1000;
-    var autoplay = {{ section.settings.autoplay | default: true }};
+    var autoplayDelay = (parseFloat(section.dataset.autoplaySpeed) || 6) * 1000;
+    var autoplay = section.dataset.autoplay !== 'false';
     var timer = null;
     var isTransitioning = false;
 
     function goTo(index) {
       if (isTransitioning || index === current) return;
       isTransitioning = true;
-
       slides[current].classList.remove('is-active');
       slides[current].classList.add('is-leaving');
       if (dots[current]) dots[current].classList.remove('is-active');
-
       current = (index + total) % total;
-
       slides[current].classList.add('is-active');
       if (dots[current]) dots[current].classList.add('is-active');
-
       resetProgress();
-
       setTimeout(function () {
         slides.forEach(function (s) { s.classList.remove('is-leaving'); });
         isTransitioning = false;
@@ -159,9 +341,7 @@
       timer = setInterval(next, autoplayDelay);
     }
 
-    function stopAutoplay() {
-      clearInterval(timer);
-    }
+    function stopAutoplay() { clearInterval(timer); }
 
     if (prevBtn) prevBtn.addEventListener('click', function () { stopAutoplay(); prev(); startAutoplay(); });
     if (nextBtn) nextBtn.addEventListener('click', function () { stopAutoplay(); next(); startAutoplay(); });
@@ -169,16 +349,14 @@
     dots.forEach(function (dot) {
       dot.addEventListener('click', function () {
         stopAutoplay();
-        goTo(parseInt(this.getAttribute('data-index'), 10));
+        goTo(parseInt(dot.getAttribute('data-index'), 10));
         startAutoplay();
       });
     });
 
-    /* Pause on hover */
     section.addEventListener('mouseenter', stopAutoplay);
     section.addEventListener('mouseleave', startAutoplay);
 
-    /* Touch swipe */
     var touchStartX = 0;
     section.addEventListener('touchstart', function (e) { touchStartX = e.touches[0].clientX; }, { passive: true });
     section.addEventListener('touchend', function (e) {
@@ -191,12 +369,13 @@
     }, { passive: true });
 
     startAutoplay();
-  })();
-</script>
+  }
+})();
+{% endjavascript %}
 
 {% schema %}
 {
-  "name": "Hero Carousel",
+  "name": "t:names.hero_carousel",
   "tag": "section",
   "class": "section-hero-carousel",
   "max_blocks": 6,
@@ -204,13 +383,13 @@
     {
       "type": "checkbox",
       "id": "autoplay",
-      "label": "Auto-rotate slides",
+      "label": "t:carousel_settings.auto_rotate",
       "default": true
     },
     {
       "type": "range",
       "id": "autoplay_speed",
-      "label": "Seconds per slide",
+      "label": "t:carousel_settings.seconds_per_slide",
       "min": 3,
       "max": 12,
       "step": 1,
@@ -221,48 +400,48 @@
   "blocks": [
     {
       "type": "slide",
-      "name": "Slide",
+      "name": "t:names.slide",
       "settings": [
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Image"
+          "label": "t:carousel_settings.image"
         },
         {
           "type": "text",
           "id": "subtitle",
-          "label": "Subtitle",
+          "label": "t:carousel_settings.subtitle",
           "default": "New Collection"
         },
         {
           "type": "textarea",
           "id": "heading",
-          "label": "Heading",
+          "label": "t:labels.heading",
           "default": "Nurturing Your Creative Spirit"
         },
         {
           "type": "textarea",
           "id": "description",
-          "label": "Description",
+          "label": "t:carousel_settings.description",
           "default": "Our industry-leading standards for product safety give you the power to make better."
         },
         {
           "type": "text",
           "id": "button_label",
-          "label": "Button label",
+          "label": "t:carousel_settings.button_label",
           "default": "Shop Now"
         },
         {
           "type": "url",
           "id": "button_link",
-          "label": "Button link"
+          "label": "t:carousel_settings.button_link"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Hero Carousel",
+      "name": "t:names.hero_carousel",
       "blocks": [
         {
           "type": "slide",

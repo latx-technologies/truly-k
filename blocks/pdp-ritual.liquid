@@ -1,0 +1,135 @@
+{% doc %}
+  Renders the "Complete the Ritual" pairs-with grid.
+
+  Reads from product.metafields.custom.pairs_with (list.product_reference).
+  Falls back to merchant-configurable demo cards.
+
+  @example
+  {% content_for 'block', type: 'pdp_ritual', id: 'pdp-ritual' %}
+{% enddoc %}
+
+{%- assign pairs = product.metafields.custom.pairs_with.value -%}
+
+<section class="pdp-ritual" {{ block.shopify_attributes }}>
+  <div class="pdp__container">
+    <div class="pdp-ritual__head">
+      <div>
+        <span class="pdp-ritual__eyebrow">{{ block.settings.eyebrow | default: 'Pairs With' }}</span>
+        <h2 class="pdp-ritual__heading">{{ block.settings.heading | default: 'Complete the ritual' }}</h2>
+      </div>
+      <a href="{{ block.settings.view_all_link | default: routes.all_products_collection_url }}" class="pdp-ritual__view-all">
+        {{ block.settings.view_all_label | default: 'View All' }}
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="pdp-ritual__grid">
+      {%- if pairs != blank -%}
+        {%- for p in pairs limit: 4 -%}
+          <a class="pdp-ritual__card" href="{{ p.url }}">
+            <div class="pdp-ritual__img{% unless p.featured_image %} pdp-ritual__img--placeholder{% endunless %}">
+              {%- if p.featured_image -%}
+                {{ p.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: p.title }}
+              {%- endif -%}
+              <span class="pdp-ritual__tag">{{ p.type | upcase | default: 'PRODUCT' }}</span>
+            </div>
+            <div class="pdp-ritual__meta">
+              <span class="pdp-ritual__type">
+                {{ p.type | upcase | default: 'PRODUCT' }} · {{ forloop.index | prepend: '00' | slice: -3, 3 }}
+              </span>
+              <h3 class="pdp-ritual__name">{{ p.title }}</h3>
+              <span class="pdp-ritual__price">{{ p.price | money }}</span>
+            </div>
+          </a>
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign pair_types  = block.settings.fallback_types  | split: '|' -%}
+        {%- assign pair_tags   = block.settings.fallback_tags   | split: '|' -%}
+        {%- assign pair_names  = block.settings.fallback_names  | split: '|' -%}
+        {%- assign pair_prices = block.settings.fallback_prices | split: '|' -%}
+        {%- for name in pair_names -%}
+          <a class="pdp-ritual__card" href="{{ routes.all_products_collection_url }}">
+            <div class="pdp-ritual__img pdp-ritual__img--placeholder" data-tone="{{ forloop.index }}">
+              <span class="pdp-ritual__tag">{{ pair_tags[forloop.index0] }}</span>
+            </div>
+            <div class="pdp-ritual__meta">
+              <span class="pdp-ritual__type">
+                {{ pair_types[forloop.index0] | upcase }} · {{ forloop.index | plus: 1 | prepend: '00' | slice: -3, 3 }}
+              </span>
+              <h3 class="pdp-ritual__name">{{ name }}</h3>
+              <span class="pdp-ritual__price">{{ pair_prices[forloop.index0] }}</span>
+            </div>
+          </a>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:pdp.ritual.name",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:pdp.ritual.eyebrow_label",
+      "default": "Pairs With"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Complete the ritual"
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "t:pdp.ritual.view_all_label",
+      "default": "View All"
+    },
+    {
+      "type": "url",
+      "id": "view_all_link",
+      "label": "t:pdp.ritual.view_all_link"
+    },
+    {
+      "type": "header",
+      "content": "t:pdp.ritual.fallback_header"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:pdp.ritual.fallback_info"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_names",
+      "label": "t:pdp.ritual.fallback_names_label",
+      "info": "Pipe-separated (|).",
+      "default": "Quiet Cleansing Balm|Hanji Softening Essence|Slow Morning Cream|Overnight Clay Mask"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_types",
+      "label": "t:pdp.ritual.fallback_types_label",
+      "info": "Pipe-separated (|), one per name.",
+      "default": "Cleanser|Essence|Moisturiser|Treatment"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_tags",
+      "label": "t:pdp.ritual.fallback_tags_label",
+      "info": "Pipe-separated (|), one per name.",
+      "default": "CLEANSER|ESSENCE|MOISTURISER|MASK"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_prices",
+      "label": "t:pdp.ritual.fallback_prices_label",
+      "info": "Pipe-separated (|), one per name.",
+      "default": "$64|$72|$92|$58"
+    }
+  ],
+  "presets": [{ "name": "t:pdp.ritual.name" }]
+}
+{% endschema %}

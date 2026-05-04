@@ -1,52 +1,1134 @@
 {% comment %}
-  This section is used in the product template to render product page with
-  media, content, and add-to-cart form.
+  Product page section — main product (gallery, info, variant form).
+  Modular blocks (specs, how-to, reviews, ritual, etc.) are rendered via
+  `{% content_for 'blocks' %}` and configured in the theme editor.
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/product
+  Default theme blocks live in /blocks/:
+    pdp-specs.liquid    – specifications accordion
+    pdp-howto.liquid    – how-to-use steps
+    pdp-reviews.liquid  – verified-buyer testimonials
+    pdp-ritual.liquid   – complete-the-ritual pairs grid
+
+  Merchants add, remove, or reorder these via the theme editor.
 {% endcomment %}
 
-<div class="product-images">
-  {% for image in product.images %}
-    {% render 'image', class: 'product-image', image: image %}
-  {% endfor %}
-</div>
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign size_option     = product.options_with_values | where: 'name', 'Size'    | first -%}
+{%- assign formula_option  = product.options_with_values | where: 'name', 'Formula' | first -%}
+{%- assign color_option    = product.options_with_values | where: 'name', 'Color'   | first -%}
+{%- if formula_option == blank -%}
+  {%- assign formula_option = color_option -%}
+{%- endif -%}
 
-<div class="product-info">
-  <h1>{{ product.title }}</h1>
-  <p>{{ product.price | money }}</p>
-  <p>{{ product.description }}</p>
-</div>
+{%- comment -%} =============== MAIN PRODUCT =============== {%- endcomment -%}
+<section
+  class="pdp"
+  data-pdp
+  data-product-handle="{{ product.handle }}"
+  data-product-id="{{ product.id }}"
+  data-i18n-add-to-bag="{{ 'pdp.info.add_to_bag' | t | escape }}"
+  data-i18n-sold-out="{{ 'pdp.info.sold_out' | t | escape }}"
+  data-i18n-saved="{{ 'pdp.info.wishlist_saved' | t | escape }}"
+  data-i18n-save="{{ 'pdp.info.wishlist_save' | t | escape }}"
+  data-i18n-save-percent="{{ 'pdp.info.save_percent_label' | t | escape }}"
+>
+  <div class="pdp__container">
 
-<div class="product-form">
-  {% form 'product', product %}
-    {% assign current_variant = product.selected_or_first_available_variant %}
+    {%- comment -%} ---------- Breadcrumbs ---------- {%- endcomment -%}
+    <nav class="pdp__crumbs" aria-label="{{ 'pdp.breadcrumb_label' | t }}">
+      <a href="{{ routes.root_url }}">{{ 'pdp.breadcrumb_home' | t }}</a>
+      <span class="pdp__crumb-sep">/</span>
+      {%- if collection -%}
+        <a href="{{ collection.url }}">{{ collection.title }}</a>
+      {%- else -%}
+        <a href="{{ routes.collections_url }}">{{ 'pdp.breadcrumb_shop' | t }}</a>
+      {%- endif -%}
+      <span class="pdp__crumb-sep">/</span>
+      <span class="pdp__crumb-current">{{ product.title }}</span>
+    </nav>
 
-    <select name="id">
-      {% for variant in product.variants %}
-        <option
-          value="{{ variant.id }}"
-          {% if variant == current_variant %}
-            selected="selected"
-          {% endif %}
-        >
-          {{ variant.title }} - {{ variant.price | money }}
-        </option>
-      {% endfor %}
-    </select>
+    <div class="pdp__grid">
 
-    <input type="text" name="quantity" min="1" value="1">
+      {%- comment -%} ---------- Media gallery ---------- {%- endcomment -%}
+      <div class="pdp__media" data-gallery>
+        <div class="pdp__thumbs" role="list">
+          {%- for media in product.media -%}
+            <button
+              type="button"
+              class="pdp__thumb{% if forloop.first %} is-active{% endif %}"
+              data-thumb
+              data-index="{{ forloop.index0 }}"
+              aria-label="{{ 'pdp.gallery.view_image' | t: index: forloop.index }}"
+              role="listitem"
+            >
+              {%- if media.preview_image -%}
+                {{ media.preview_image | image_url: width: 160 | image_tag:
+                  loading: 'lazy',
+                  width: 80,
+                  height: 80,
+                  alt: media.alt | default: product.title
+                }}
+              {%- endif -%}
+            </button>
+          {%- else -%}
+            {%- for i in (1..4) -%}
+              <button
+                type="button"
+                class="pdp__thumb pdp__thumb--placeholder{% if forloop.first %} is-active{% endif %}"
+                data-thumb
+                data-index="{{ forloop.index0 }}"
+                aria-label="{{ 'pdp.gallery.thumbnail' | t: index: forloop.index }}"
+              ></button>
+            {%- endfor -%}
+          {%- endfor -%}
+        </div>
 
-    <input type="submit" value="Add to cart">
-    {{ form | payment_button }}
-  {% endform %}
-</div>
+        <div class="pdp__stage">
+          {%- if product.media.size > 0 -%}
+            {%- for media in product.media -%}
+              {%- assign loading_strat = 'lazy' -%}
+              {%- assign fetch_priority = 'auto' -%}
+              {%- if forloop.first -%}
+                {%- assign loading_strat = 'eager' -%}
+                {%- assign fetch_priority = 'high' -%}
+              {%- endif -%}
+              <div
+                class="pdp__slide{% if forloop.first %} is-active{% endif %}"
+                data-slide
+                data-index="{{ forloop.index0 }}"
+              >
+                {{ media | image_url: width: 1400 | image_tag:
+                  loading: loading_strat,
+                  fetchpriority: fetch_priority,
+                  width: 1400,
+                  alt: media.alt | default: product.title,
+                  class: 'pdp__image'
+                }}
+              </div>
+            {%- endfor -%}
+          {%- else -%}
+            <div class="pdp__slide pdp__slide--placeholder is-active">
+              <div class="pdp__placeholder-tag">{{ 'pdp.gallery.placeholder' | t }}</div>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- comment -%} ---------- Product info ---------- {%- endcomment -%}
+      <div class="pdp__info">
+        <div class="pdp__eyebrow">
+          <span class="pdp__dot" aria-hidden="true"></span>
+          <span>
+            {%- if product.type != blank -%}{{ product.type }}{%- else -%}{{ 'pdp.info.product' | t }}{%- endif -%}
+            <span class="pdp__sep"> · </span>
+            {{ product.id | modulo: 1000 | prepend: '000' | slice: -3, 3 }}
+          </span>
+        </div>
+
+        <h1 class="pdp__title">{{ product.title }}</h1>
+
+        {%- if product.description != blank -%}
+          <div class="pdp__desc">
+            {{ product.description | strip_html | truncatewords: 40 }}
+          </div>
+        {%- endif -%}
+
+        {%- assign rating_value = product.metafields.reviews.rating.value | default: 4.9 -%}
+        {%- assign rating_count = product.metafields.reviews.rating_count.value | default: 1248 -%}
+        <div class="pdp__rating">
+          <span class="pdp__stars" aria-label="{{ 'pdp.info.rated_out_of' | t: rating: rating_value }}">
+            {%- assign filled = rating_value | round -%}
+            {%- for i in (1..5) -%}
+              {%- if forloop.index0 < filled -%}★{%- else -%}☆{%- endif -%}
+            {%- endfor -%}
+          </span>
+          <a href="#reviews" class="pdp__rating-link">
+            {{ rating_value }} · {{ 'pdp.info.review_count' | t: count: rating_count }}
+          </a>
+        </div>
+
+        <hr class="pdp__rule" />
+
+        <div class="pdp__price" data-price-wrap>
+          <span class="pdp__price-current" data-price>
+            {{ current_variant.price | money }}
+          </span>
+          {%- if current_variant.compare_at_price > current_variant.price -%}
+            <span class="pdp__price-compare" data-price-compare>
+              {{ current_variant.compare_at_price | money }}
+            </span>
+            {%- assign saved = current_variant.compare_at_price | minus: current_variant.price | times: 100.0 | divided_by: current_variant.compare_at_price | round -%}
+            <span class="pdp__save" data-save-badge>{{ 'pdp.info.save_percent' | t: percent: saved }}</span>
+          {%- else -%}
+            <span class="pdp__price-compare" data-price-compare hidden></span>
+            <span class="pdp__save" data-save-badge hidden></span>
+          {%- endif -%}
+        </div>
+
+        {%- form 'product', product, class: 'pdp__form', novalidate: 'novalidate' -%}
+          <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
+
+          {%- if size_option -%}
+            <div class="pdp__option" data-option-row data-option-name="{{ size_option.name }}">
+              <div class="pdp__option-head">
+                <span class="pdp__label">{{ size_option.name }}</span>
+                <span class="pdp__label pdp__label--muted" data-option-selected="{{ size_option.name }}">
+                  {{ size_option.selected_value }}
+                </span>
+              </div>
+              <div class="pdp__sizes" role="radiogroup" aria-label="{{ size_option.name }}">
+                {%- for value in size_option.values -%}
+                  {%- assign is_selected = false -%}
+                  {%- if value == size_option.selected_value -%}{%- assign is_selected = true -%}{%- endif -%}
+                  <button
+                    type="button"
+                    class="pdp__size{% if is_selected %} is-active{% endif %}"
+                    data-option-value
+                    data-option-name="{{ size_option.name }}"
+                    data-value="{{ value | escape }}"
+                    role="radio"
+                    aria-checked="{{ is_selected }}"
+                  >
+                    <span class="pdp__size-main">{{ value }}</span>
+                    <span class="pdp__size-sub">
+                      {%- case forloop.index -%}
+                        {%- when 1 -%}{{ 'pdp.info.size_discovery' | t }}
+                        {%- when 2 -%}{{ 'pdp.info.size_standard' | t }}
+                        {%- when 3 -%}{{ 'pdp.info.size_extended' | t }}
+                        {%- else -%}&nbsp;
+                      {%- endcase -%}
+                    </span>
+                  </button>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if formula_option -%}
+            <div class="pdp__option" data-option-row data-option-name="{{ formula_option.name }}">
+              <div class="pdp__option-head">
+                <span class="pdp__label">{{ formula_option.name }}</span>
+                <span class="pdp__label pdp__label--muted" data-option-selected="{{ formula_option.name }}">
+                  {{ formula_option.selected_value }}
+                </span>
+              </div>
+              <div class="pdp__swatches" role="radiogroup" aria-label="{{ formula_option.name }}">
+                {%- for value in formula_option.values -%}
+                  {%- assign is_selected = false -%}
+                  {%- if value == formula_option.selected_value -%}{%- assign is_selected = true -%}{%- endif -%}
+                  <button
+                    type="button"
+                    class="pdp__swatch{% if is_selected %} is-active{% endif %}"
+                    data-option-value
+                    data-option-name="{{ formula_option.name }}"
+                    data-value="{{ value | escape }}"
+                    style="--swatch: {{ value | handle }};"
+                    role="radio"
+                    aria-checked="{{ is_selected }}"
+                    aria-label="{{ value }}"
+                    title="{{ value }}"
+                  ></button>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
+
+          <div class="pdp__cta-row">
+            <div class="pdp__qty" data-qty>
+              <button type="button" class="pdp__qty-btn" data-qty-decrement aria-label="{{ 'pdp.info.qty_decrease' | t }}">−</button>
+              <input type="number" name="quantity" value="1" min="1" class="pdp__qty-input" data-qty-input aria-label="{{ 'pdp.info.qty_label' | t }}">
+              <button type="button" class="pdp__qty-btn" data-qty-increment aria-label="{{ 'pdp.info.qty_increase' | t }}">+</button>
+            </div>
+
+            <button
+              type="submit"
+              name="add"
+              class="pdp__add"
+              data-add-btn
+              {% unless current_variant.available %}disabled{% endunless %}
+            >
+              <span class="pdp__add-label" data-add-label>
+                {%- if current_variant.available -%}{{ 'pdp.info.add_to_bag' | t }}{%- else -%}{{ 'pdp.info.sold_out' | t }}{%- endif -%}
+              </span>
+              <span class="pdp__add-price" data-add-price>{{ current_variant.price | money }}</span>
+            </button>
+          </div>
+
+          <button type="button" class="pdp__wishlist" data-wishlist>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
+            </svg>
+            <span>{{ 'pdp.info.wishlist_save' | t }}</span>
+          </button>
+
+          <script type="application/json" data-variants>
+            {{ product.variants | json }}
+          </script>
+        {%- endform -%}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{%- comment -%} =============== Modular PDP blocks =============== {%- endcomment -%}
+{% content_for 'blocks' %}
+
+{% javascript %}
+(function () {
+  'use strict';
+
+  document.querySelectorAll('[data-pdp]').forEach(initPDP);
+  initAccordions(document);
+  initReviewsCarousel(document);
+
+  function initPDP(root) {
+    var variants = [];
+    try {
+      var json = root.querySelector('[data-variants]');
+      if (json) variants = JSON.parse(json.textContent);
+    } catch (e) {
+      console.warn('PDP: could not parse variants', e);
+    }
+
+    var i18n = {
+      addToBag: root.dataset.i18nAddToBag || 'Add to Bag',
+      soldOut: root.dataset.i18nSoldOut || 'Sold Out',
+      saved: root.dataset.i18nSaved || 'Saved to Wishlist',
+      save: root.dataset.i18nSave || 'Save to Wishlist',
+      savePercent: root.dataset.i18nSavePercent || 'Save'
+    };
+
+    var selected = {};
+    root.querySelectorAll('[data-option-value].is-active').forEach(function (btn) {
+      selected[btn.dataset.optionName] = btn.dataset.value;
+    });
+
+    var thumbs = root.querySelectorAll('[data-thumb]');
+    var slides = root.querySelectorAll('[data-slide]');
+    thumbs.forEach(function (thumb) {
+      thumb.addEventListener('click', function () {
+        var i = thumb.dataset.index;
+        thumbs.forEach(function (t) { t.classList.toggle('is-active', t.dataset.index === i); });
+        slides.forEach(function (s) { s.classList.toggle('is-active', s.dataset.index === i); });
+      });
+    });
+
+    root.querySelectorAll('[data-option-value]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var name = btn.dataset.optionName;
+        var val = btn.dataset.value;
+        root.querySelectorAll('[data-option-value][data-option-name="' + cssEscape(name) + '"]').forEach(function (sib) {
+          var isActive = sib === btn;
+          sib.classList.toggle('is-active', isActive);
+          sib.setAttribute('aria-checked', isActive ? 'true' : 'false');
+        });
+        selected[name] = val;
+        var label = root.querySelector('[data-option-selected="' + cssEscape(name) + '"]');
+        if (label) label.textContent = val;
+        syncVariant();
+      });
+    });
+
+    var qtyInput = root.querySelector('[data-qty-input]');
+    var qtyMinus = root.querySelector('[data-qty-decrement]');
+    var qtyPlus = root.querySelector('[data-qty-increment]');
+    if (qtyMinus && qtyInput) {
+      qtyMinus.addEventListener('click', function () {
+        qtyInput.value = Math.max(1, (parseInt(qtyInput.value, 10) || 1) - 1);
+      });
+    }
+    if (qtyPlus && qtyInput) {
+      qtyPlus.addEventListener('click', function () {
+        qtyInput.value = (parseInt(qtyInput.value, 10) || 1) + 1;
+      });
+    }
+    if (qtyInput) {
+      qtyInput.addEventListener('input', function () {
+        var v = parseInt(qtyInput.value, 10);
+        if (!v || v < 1) qtyInput.value = 1;
+      });
+    }
+
+    var wishBtn = root.querySelector('[data-wishlist]');
+    if (wishBtn) {
+      wishBtn.addEventListener('click', function () {
+        wishBtn.classList.toggle('is-saved');
+        var saved = wishBtn.classList.contains('is-saved');
+        var label = wishBtn.querySelector('span');
+        if (label) label.textContent = saved ? i18n.saved : i18n.save;
+      });
+    }
+
+    function syncVariant() {
+      if (!variants.length) return;
+      var match = variants.find(function (v) {
+        var opts = v.options || [];
+        return Object.keys(selected).every(function (name) {
+          var idx = findOptionIndex(name);
+          if (idx === -1) return true;
+          return opts[idx] === selected[name];
+        });
+      });
+      if (!match) return;
+
+      var idInput = root.querySelector('[data-variant-id]');
+      if (idInput) idInput.value = match.id;
+      var priceEl = root.querySelector('[data-price]');
+      var compEl = root.querySelector('[data-price-compare]');
+      var saveEl = root.querySelector('[data-save-badge]');
+      var btnPrice = root.querySelector('[data-add-price]');
+
+      if (priceEl) priceEl.textContent = formatMoney(match.price);
+      if (btnPrice) btnPrice.textContent = formatMoney(match.price);
+
+      if (compEl) {
+        if (match.compare_at_price && match.compare_at_price > match.price) {
+          compEl.textContent = formatMoney(match.compare_at_price);
+          compEl.hidden = false;
+          if (saveEl) {
+            var pct = Math.round(((match.compare_at_price - match.price) / match.compare_at_price) * 100);
+            saveEl.textContent = i18n.savePercent + ' ' + pct + '%';
+            saveEl.hidden = false;
+          }
+        } else {
+          compEl.hidden = true;
+          if (saveEl) saveEl.hidden = true;
+        }
+      }
+
+      var addBtn = root.querySelector('[data-add-btn]');
+      var addLabel = root.querySelector('[data-add-label]');
+      if (addBtn) {
+        addBtn.disabled = !match.available;
+        if (addLabel) addLabel.textContent = match.available ? i18n.addToBag : i18n.soldOut;
+      }
+
+      try {
+        var url = new URL(window.location.href);
+        url.searchParams.set('variant', match.id);
+        window.history.replaceState({}, '', url.toString());
+      } catch (e) { /* no-op */ }
+    }
+
+    function findOptionIndex(name) {
+      var rows = Array.from(root.querySelectorAll('[data-option-row]'));
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i].dataset.optionName === name) return i;
+      }
+      return -1;
+    }
+  }
+
+  function initAccordions(scope) {
+    scope.querySelectorAll('[data-accordion]').forEach(function (item) {
+      var trigger = item.querySelector('[data-accordion-trigger]');
+      if (!trigger) return;
+      trigger.addEventListener('click', function () {
+        var open = item.classList.toggle('is-open');
+        trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+  }
+
+  function initReviewsCarousel(scope) {
+    var track = scope.querySelector('[data-reviews-track]');
+    if (!track) return;
+    var prev = scope.querySelector('[data-reviews-prev]');
+    var next = scope.querySelector('[data-reviews-next]');
+
+    function cardWidth() {
+      var first = track.querySelector('.pdp-review');
+      if (!first) return track.clientWidth;
+      var gap = parseInt(getComputedStyle(track).columnGap || '20', 10) || 20;
+      return first.getBoundingClientRect().width + gap;
+    }
+
+    function updateDisabled() {
+      if (!prev || !next) return;
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+    }
+
+    if (prev) prev.addEventListener('click', function () { track.scrollBy({ left: -cardWidth(), behavior: 'smooth' }); });
+    if (next) next.addEventListener('click', function () { track.scrollBy({ left: cardWidth(), behavior: 'smooth' }); });
+    track.addEventListener('scroll', updateDisabled, { passive: true });
+    window.addEventListener('resize', updateDisabled);
+    requestAnimationFrame(updateDisabled);
+  }
+
+  function formatMoney(cents) {
+    var amount = (cents / 100).toFixed(2);
+    var clean = amount.endsWith('.00') ? amount.slice(0, -3) : amount;
+    return '$' + clean;
+  }
+
+  function cssEscape(s) {
+    if (window.CSS && CSS.escape) return CSS.escape(s);
+    return String(s).replace(/"/g, '\\"');
+  }
+})();
+{% endjavascript %}
+
+{% stylesheet %}
+.pdp,
+.pdp-howto,
+.pdp-reviews,
+.pdp-ritual { color: var(--color-text); }
+
+.pdp *,
+.pdp-howto *,
+.pdp-reviews *,
+.pdp-ritual *,
+.pdp *::before,
+.pdp-howto *::before,
+.pdp-reviews *::before,
+.pdp-ritual *::before { box-sizing: border-box; }
+
+.pdp__container {
+  max-width: var(--container-max-width);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+}
+
+.pdp {
+  padding-top: var(--section-padding-top);
+  padding-bottom: calc(var(--section-padding-bottom) * 2);
+  background-color: var(--color-background);
+}
+
+.pdp__crumbs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-gray-500);
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 40px;
+}
+.pdp__crumbs a { color: var(--color-gray-500); text-decoration: none; transition: color var(--transition-fast); }
+.pdp__crumbs a:hover { color: var(--color-black); }
+.pdp__crumb-sep { color: var(--color-gray-300); }
+.pdp__crumb-current { color: var(--color-black); }
+
+.pdp__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+.pdp__media { display: grid; grid-template-columns: 72px 1fr; gap: 16px; }
+.pdp__thumbs { display: flex; flex-direction: column; gap: 10px; }
+.pdp__thumb {
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-gray-100);
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+.pdp__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pdp__thumb:hover { border-color: var(--color-gray-600); }
+.pdp__thumb.is-active { border-color: var(--color-black); border-width: 1.5px; }
+.pdp__thumb--placeholder:nth-child(1) { background-color: var(--color-gray-100); }
+.pdp__thumb--placeholder:nth-child(2) { background: repeating-linear-gradient(45deg, var(--color-gray-100) 0 4px, var(--color-gray-200) 4px 6px); }
+.pdp__thumb--placeholder:nth-child(3) { background: repeating-linear-gradient(45deg, var(--color-gray-100) 0 4px, var(--color-gray-300) 4px 5px); }
+.pdp__thumb--placeholder:nth-child(4) { background-color: var(--color-black); }
+
+.pdp__stage { position: relative; background-color: var(--color-gray-100); aspect-ratio: 4 / 5; overflow: hidden; }
+.pdp__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+  display: grid;
+  place-items: center;
+}
+.pdp__slide.is-active { opacity: 1; }
+.pdp__image { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pdp__slide--placeholder {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 18px, rgba(0, 0, 0, 0.04) 18px 19px),
+    var(--color-gray-100);
+}
+.pdp__placeholder-tag {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gray-600);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-white);
+  padding: 10px 18px;
+}
+
+.pdp__info { padding-top: 8px; max-width: 480px; }
+.pdp__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-gray-600);
+  margin-bottom: 20px;
+}
+.pdp__dot { width: 6px; height: 6px; border-radius: 50%; background-color: var(--color-black); }
+.pdp__sep { color: var(--color-gray-400); margin: 0 2px; }
+
+.pdp__title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2.5rem, 4.5vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 22px;
+  color: var(--color-black);
+}
+.pdp__desc {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  color: var(--color-gray-600);
+  margin-bottom: 22px;
+  max-width: 44ch;
+}
+
+.pdp__rating { display: flex; align-items: center; gap: 10px; font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-gray-600); }
+.pdp__stars { letter-spacing: 2px; color: var(--color-black); font-size: var(--text-sm); }
+.pdp__rating-link {
+  color: var(--color-gray-600);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition-fast);
+}
+.pdp__rating-link:hover { color: var(--color-black); }
+.pdp__rule { border: 0; border-top: 1px solid var(--color-border); margin: 28px 0 26px; }
+
+.pdp__price { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+.pdp__price-current {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 500;
+  color: var(--color-black);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.pdp__price-compare { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-gray-400); text-decoration: line-through; }
+.pdp__price-compare[hidden] { display: none; }
+.pdp__save {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-700);
+  padding: 6px 10px;
+}
+.pdp__save[hidden] { display: none; }
+
+.pdp__option { margin-bottom: 26px; }
+.pdp__option-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.pdp__label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-black);
+}
+.pdp__label--muted { color: var(--color-gray-500); font-weight: 500; }
+
+.pdp__sizes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pdp__size {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--btn-radius);
+  padding: 14px 8px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: border-color var(--transition-fast),
+              background-color var(--transition-fast),
+              color var(--transition-fast);
+  font-family: var(--font-body);
+  color: var(--color-black);
+}
+.pdp__size-main { font-family: var(--font-display); font-style: italic; font-size: var(--text-lg); font-weight: 500; line-height: 1; }
+.pdp__size-sub {
+  font-family: var(--font-body);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gray-500);
+}
+.pdp__size:hover { border-color: var(--color-gray-600); }
+.pdp__size.is-active { background-color: var(--color-black); border-color: var(--color-black); color: var(--color-white); }
+.pdp__size.is-active .pdp__size-sub { color: rgba(255,255,255,0.7); }
+
+.pdp__swatches { display: flex; gap: 12px; }
+.pdp__swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  padding: 0;
+  background-color: var(--color-gray-100);
+  transition: transform var(--transition-fast);
+}
+.pdp__swatch[style*="original"],
+.pdp__swatch[style*="unscented"],
+.pdp__swatch[style*="cream"]  { background-color: #ecdfc8; }
+.pdp__swatch[style*="rose"],
+.pdp__swatch[style*="pink"]   { background-color: #e9c6c1; }
+.pdp__swatch[style*="amber"],
+.pdp__swatch[style*="warm"],
+.pdp__swatch[style*="bronze"] { background-color: #a8825c; }
+.pdp__swatch[style*="midnight"],
+.pdp__swatch[style*="blue"],
+.pdp__swatch[style*="slate"]  { background-color: #6f7d88; }
+.pdp__swatch:hover { transform: scale(1.06); }
+.pdp__swatch.is-active {
+  box-shadow: 0 0 0 1px var(--color-white) inset, 0 0 0 1.5px var(--color-black);
+  border-color: transparent;
+}
+
+.pdp__cta-row { display: grid; grid-template-columns: 120px 1fr; gap: 10px; margin-top: 28px; margin-bottom: 18px; }
+.pdp__qty {
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--btn-radius);
+  height: 54px;
+}
+.pdp__qty-btn {
+  background: transparent;
+  border: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  cursor: pointer;
+  color: var(--color-black);
+  height: 100%;
+  transition: background-color var(--transition-fast);
+}
+.pdp__qty-btn:hover { background-color: var(--color-gray-100); }
+.pdp__qty-input {
+  border: 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-black);
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+.pdp__qty-input::-webkit-outer-spin-button,
+.pdp__qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.pdp__add {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  border: var(--btn-border-width) solid var(--color-black);
+  border-radius: var(--btn-radius);
+  padding: 0 24px;
+  height: 54px;
+  font-family: var(--font-body);
+  font-size: var(--btn-font-size);
+  font-weight: var(--btn-font-weight);
+  letter-spacing: var(--btn-letter-spacing);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.pdp__add:hover:not(:disabled) { background-color: var(--color-white); color: var(--color-black); }
+.pdp__add:disabled { opacity: 0.55; cursor: not-allowed; }
+.pdp__add-price {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-base);
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.pdp__wishlist {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  padding: 8px 0;
+  color: var(--color-gray-600);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.pdp__wishlist:hover { color: var(--color-black); }
+.pdp__wishlist.is-saved { color: var(--color-black); }
+.pdp__wishlist.is-saved svg { fill: var(--color-black); }
+
+.pdp-specs { margin-top: 80px; }
+.pdp-specs__item { border-top: 1px solid var(--color-border); }
+.pdp-specs__item:last-child { border-bottom: 1px solid var(--color-border); }
+.pdp-specs__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 22px 0;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-black);
+  text-align: left;
+}
+.pdp-specs__icon { position: relative; width: 16px; height: 16px; flex-shrink: 0; }
+.pdp-specs__icon::before,
+.pdp-specs__icon::after { content: ''; position: absolute; background-color: var(--color-black); transition: transform var(--transition-fast); }
+.pdp-specs__icon::before { top: 50%; left: 0; right: 0; height: 1.5px; transform: translateY(-50%); }
+.pdp-specs__icon::after { left: 50%; top: 0; bottom: 0; width: 1.5px; transform: translateX(-50%); }
+.pdp-specs__item.is-open .pdp-specs__icon::after { transform: translateX(-50%) scaleY(0); }
+.pdp-specs__body { max-height: 0; overflow: hidden; transition: max-height var(--transition-medium); }
+.pdp-specs__item.is-open .pdp-specs__body { max-height: 2000px; }
+.pdp-specs__text {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--color-gray-600);
+  padding: 4px 0 24px;
+  max-width: 80ch;
+}
+.pdp-specs__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+}
+.pdp-specs__table th,
+.pdp-specs__table td { text-align: left; padding: 14px 20px; font-weight: 500; color: var(--color-black); }
+.pdp-specs__table th { width: 30%; color: var(--color-black); }
+.pdp-specs__table td { color: var(--color-gray-700); }
+.pdp-specs__table tr:nth-child(odd) { background-color: var(--color-gray-100); }
+
+.pdp-howto { padding-block: calc(var(--section-padding-top) * 2.5); background-color: var(--color-background); }
+.pdp-howto__heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-black);
+  margin: 0 0 48px;
+}
+.pdp-howto__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+.pdp-howto__step { display: flex; flex-direction: column; }
+.pdp-howto__img { aspect-ratio: 1 / 1; background-color: var(--color-gray-100); overflow: hidden; margin-bottom: 20px; }
+.pdp-howto__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pdp-howto__img--placeholder {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 14px, rgba(0, 0, 0, 0.035) 14px 15px),
+    var(--color-gray-100);
+}
+.pdp-howto__num {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px dotted var(--color-gray-300);
+}
+.pdp-howto__step-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  color: var(--color-black);
+  margin: 0 0 10px;
+  line-height: 1.2;
+}
+.pdp-howto__desc { font-family: var(--font-body); font-size: var(--text-sm); line-height: 1.6; color: var(--color-gray-600); margin: 0; }
+
+.pdp-reviews { padding-block: calc(var(--section-padding-top) * 2.5); background-color: var(--color-gray-100); }
+.pdp-reviews__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 16px; }
+.pdp-reviews__heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 600;
+  color: var(--color-black);
+  margin: 0;
+}
+.pdp-reviews__nav { display: flex; gap: 8px; }
+.pdp-reviews__arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-white);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-700);
+  transition: border-color var(--transition-fast),
+              color var(--transition-fast),
+              opacity var(--transition-fast);
+}
+.pdp-reviews__arrow:hover { border-color: var(--color-black); color: var(--color-black); }
+.pdp-reviews__arrow:disabled { opacity: 0.35; cursor: not-allowed; }
+.pdp-reviews__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(340px, 1fr);
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+.pdp-reviews__track::-webkit-scrollbar { display: none; }
+.pdp-review {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 20px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+}
+.pdp-review__top { display: grid; grid-template-columns: 1fr 120px; gap: 16px; align-items: start; margin-bottom: 14px; }
+.pdp-review__id { display: flex; gap: 12px; align-items: center; }
+.pdp-review__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-700);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-base);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.pdp-review__avatar[data-avatar="1"] { background-color: var(--color-gray-300); }
+.pdp-review__avatar[data-avatar="2"] { background-color: var(--color-gray-200); }
+.pdp-review__avatar[data-avatar="3"] { background-color: var(--color-gray-400); color: var(--color-white); }
+.pdp-review__avatar[data-avatar="4"] { background-color: var(--color-gray-700); color: var(--color-white); }
+.pdp-review__avatar[data-avatar="5"] { background-color: var(--color-gray-500); color: var(--color-white); }
+.pdp-review__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.pdp-review__name { font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; color: var(--color-black); }
+.pdp-review__badge { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-gray-500); }
+.pdp-review__photo { width: 120px; height: 90px; background-color: var(--color-gray-100); overflow: hidden; border-radius: 2px; }
+.pdp-review__photo img { width: 100%; height: 100%; object-fit: cover; }
+.pdp-review__photo--placeholder {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 10px, rgba(0, 0, 0, 0.04) 10px 11px),
+    var(--color-gray-100);
+}
+.pdp-review__quote { font-family: var(--font-body); font-size: var(--text-sm); line-height: 1.6; color: var(--color-gray-700); margin: 0; flex-grow: 1; }
+.pdp-review__rule { border: 0; border-top: 1px solid var(--color-border); margin: 18px 0 14px; }
+.pdp-review__product {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-gray-700);
+  text-decoration: none;
+}
+a.pdp-review__product:hover { color: var(--color-black); }
+.pdp-review__product img,
+.pdp-review__product-thumb {
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-gray-100);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  display: inline-block;
+}
+.pdp-review__product-thumb[data-thumb="1"] { background-color: #ecdfc8; }
+.pdp-review__product-thumb[data-thumb="2"] { background-color: var(--color-gray-200); }
+.pdp-review__product-thumb[data-thumb="3"] { background-color: #e9c6c1; }
+.pdp-review__product-thumb[data-thumb="4"] { background-color: #d7cbb6; }
+.pdp-review__product-thumb[data-thumb="5"] { background-color: #6f7d88; }
+
+.pdp-ritual { padding-block: calc(var(--section-padding-top) * 2.5); background-color: var(--color-background); }
+.pdp-ritual__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 40px; }
+.pdp-ritual__eyebrow {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gray-500);
+  margin-bottom: 12px;
+}
+.pdp-ritual__heading {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  color: var(--color-black);
+  margin: 0;
+  line-height: 1.1;
+}
+.pdp-ritual__view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-black);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+}
+.pdp-ritual__view-all:hover { color: var(--color-gray-600); }
+.pdp-ritual__view-all svg { transition: transform var(--transition-fast); }
+.pdp-ritual__view-all:hover svg { transform: translateX(3px); }
+
+.pdp-ritual__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.pdp-ritual__card { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+.pdp-ritual__img {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background-color: var(--color-gray-100);
+  overflow: hidden;
+  margin-bottom: 16px;
+  display: grid;
+  place-items: center;
+}
+.pdp-ritual__img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--transition-smooth); }
+.pdp-ritual__card:hover .pdp-ritual__img img { transform: scale(1.03); }
+.pdp-ritual__img--placeholder {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 14px, rgba(0, 0, 0, 0.035) 14px 15px),
+    var(--color-gray-100);
+}
+.pdp-ritual__img--placeholder[data-tone="1"] { background-color: var(--color-gray-100); }
+.pdp-ritual__img--placeholder[data-tone="2"] { background-color: #f1ede6; }
+.pdp-ritual__img--placeholder[data-tone="3"] { background-color: var(--color-gray-200); }
+.pdp-ritual__img--placeholder[data-tone="4"] { background: var(--color-gray-900); }
+.pdp-ritual__img--placeholder[data-tone="4"] .pdp-ritual__tag {
+  background-color: var(--color-black);
+  color: var(--color-white);
+  border-color: var(--color-gray-800);
+}
+.pdp-ritual__tag {
+  font-family: var(--font-body);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
+  border: 1px solid var(--color-border);
+  padding: 7px 14px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.pdp-ritual__meta { display: flex; flex-direction: column; gap: 4px; }
+.pdp-ritual__type {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gray-500);
+}
+.pdp-ritual__name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-xl);
+  font-weight: 500;
+  color: var(--color-black);
+  margin: 2px 0 4px;
+  line-height: 1.2;
+}
+.pdp-ritual__price { font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-gray-700); }
+
+@media (max-width: 992px) {
+  .pdp__grid { grid-template-columns: 1fr; gap: 40px; }
+  .pdp__info { max-width: none; }
+  .pdp__media { grid-template-columns: 64px 1fr; }
+  .pdp__thumb { width: 64px; height: 64px; }
+  .pdp-howto__grid { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+  .pdp-ritual__grid { grid-template-columns: repeat(2, 1fr); }
+  .pdp-reviews__track { grid-auto-columns: minmax(300px, 85%); }
+}
+@media (max-width: 540px) {
+  .pdp__cta-row { grid-template-columns: 110px 1fr; }
+  .pdp__add { padding: 0 16px; gap: 10px; }
+  .pdp__add-price { font-size: var(--text-sm); }
+  .pdp-howto__grid { grid-template-columns: 1fr; }
+  .pdp-ritual__grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .pdp-ritual__head { flex-direction: column; align-items: flex-start; }
+  .pdp-specs__head { font-size: var(--text-lg); }
+  .pdp-specs__table th, .pdp-specs__table td { padding: 12px 14px; }
+  .pdp-review { padding: 16px; }
+  .pdp-review__top { grid-template-columns: 1fr 80px; }
+  .pdp-review__photo { width: 80px; height: 70px; }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.product",
+  "blocks": [
+    { "type": "pdp-specs" },
+    { "type": "pdp-howto" },
+    { "type": "pdp-reviews" },
+    { "type": "pdp-ritual" },
+    { "type": "@app" }
+  ],
   "settings": [],
   "disabled_on": {
     "groups": ["header", "footer"]
-  }
+  },
+  "presets": [
+    {
+      "name": "t:general.product",
+      "blocks": [
+        { "type": "pdp-specs" },
+        { "type": "pdp-howto" },
+        { "type": "pdp-reviews" },
+        { "type": "pdp-ritual" }
+      ]
+    }
+  ]
 }
 {% endschema %}

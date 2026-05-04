@@ -1,0 +1,108 @@
+{% doc %}
+  Renders the PDP specifications accordion (Specifications, Ingredients,
+  Shipping & Returns).
+
+  Reads the following metafields with sensible fallbacks:
+    product.metafields.specs.long_description (richtext)
+    product.metafields.specs.skin_type        (single_line_text)
+    product.metafields.specs.ingredients      (multi_line_text/richtext)
+    product.metafields.specs.shipping         (richtext)
+
+  @example
+  {% content_for 'block', type: 'pdp_specs', id: 'pdp-specs' %}
+{% enddoc %}
+
+{%- liquid
+  assign size_option = product.options_with_values | where: 'name', 'Size' | first
+  assign spec_desc = product.metafields.specs.long_description.value | default: product.description
+  assign spec_brand = product.vendor | default: 'MOOD'
+  assign spec_skin_type = product.metafields.specs.skin_type.value | default: 'All skin types'
+  assign spec_ingredients = product.metafields.specs.ingredients.value | default: block.settings.fallback_ingredients
+  assign spec_shipping = product.metafields.specs.shipping.value | default: block.settings.fallback_shipping
+-%}
+
+{%- capture spec_size_value -%}
+  {%- if size_option -%}
+    {{ size_option.values | join: ', ' }}
+  {%- else -%}
+    {{ block.settings.fallback_size }}
+  {%- endif -%}
+{%- endcapture -%}
+
+<section class="pdp-specs-section" {{ block.shopify_attributes }}>
+  <div class="pdp__container">
+    <div class="pdp-specs">
+      <div class="pdp-specs__item is-open" data-accordion>
+        <button type="button" class="pdp-specs__head" data-accordion-trigger aria-expanded="true">
+          <span class="pdp-specs__title">{{ 'pdp.specs.title' | t }}</span>
+          <span class="pdp-specs__icon" aria-hidden="true"></span>
+        </button>
+        <div class="pdp-specs__body" data-accordion-body>
+          <p class="pdp-specs__text">{{ spec_desc | strip_html | truncatewords: 55 }}</p>
+          <table class="pdp-specs__table">
+            <tbody>
+              <tr><th scope="row">{{ 'pdp.specs.brand' | t }}</th><td>{{ spec_brand }}</td></tr>
+              <tr><th scope="row">{{ 'pdp.specs.skin_type' | t }}</th><td>{{ spec_skin_type }}</td></tr>
+              <tr><th scope="row">{{ 'pdp.specs.size' | t }}</th><td>{{ spec_size_value | strip }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pdp-specs__item" data-accordion>
+        <button type="button" class="pdp-specs__head" data-accordion-trigger aria-expanded="false">
+          <span class="pdp-specs__title">{{ 'pdp.specs.ingredients' | t }}</span>
+          <span class="pdp-specs__icon" aria-hidden="true"></span>
+        </button>
+        <div class="pdp-specs__body" data-accordion-body>
+          <p class="pdp-specs__text">{{ spec_ingredients }}</p>
+        </div>
+      </div>
+
+      <div class="pdp-specs__item" data-accordion>
+        <button type="button" class="pdp-specs__head" data-accordion-trigger aria-expanded="false">
+          <span class="pdp-specs__title">{{ 'pdp.specs.shipping' | t }}</span>
+          <span class="pdp-specs__icon" aria-hidden="true"></span>
+        </button>
+        <div class="pdp-specs__body" data-accordion-body>
+          <p class="pdp-specs__text">{{ spec_shipping }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:pdp.specs.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:pdp.specs.fallback_header"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:pdp.specs.fallback_info"
+    },
+    {
+      "type": "text",
+      "id": "fallback_size",
+      "label": "t:pdp.specs.fallback_size_label",
+      "default": "30 ml, 50 ml, 100 ml"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_ingredients",
+      "label": "t:pdp.specs.fallback_ingredients_label",
+      "default": "Bakuchiol, Squalane, Rosehip Seed Oil, Jojoba Seed Oil, Evening Primrose Oil, Tocopherol (Vitamin E), Sea Buckthorn Extract, Calendula, Chamomile."
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_shipping",
+      "label": "t:pdp.specs.fallback_shipping_label",
+      "default": "Complimentary standard shipping on orders over $75. Express and international options available at checkout. Returns accepted within 30 days of delivery — items must be unused and in original packaging."
+    }
+  ],
+  "presets": [{ "name": "t:pdp.specs.name" }]
+}
+{% endschema %}

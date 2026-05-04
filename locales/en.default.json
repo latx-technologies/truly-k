@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "404": {
     "title": "404",
@@ -48,5 +57,104 @@
     "submit": "Search",
     "no_results_html": "No results found for {{ terms }}",
     "results_for_html": "{{ count }} results found for {{ terms }}"
+  },
+  "header": {
+    "find_a_store": "Find a Store",
+    "account": "Account",
+    "sign_in_register": "Sign in/ Register",
+    "open_menu": "Open menu",
+    "main_navigation": "Main navigation",
+    "trending_products": "Trending Products",
+    "new_badge": "New"
+  },
+  "footer": {
+    "customer_service": "Customer Service",
+    "call_us": "Call Us",
+    "get_in_touch": "Get in Touch",
+    "address": "Address",
+    "subscribe_success": "Thanks for subscribing!",
+    "newsletter_consent_html": "By subscribing you agree to the {{ terms_link }} & {{ privacy_link }}.",
+    "terms_of_use": "Terms of Use",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service",
+    "currency_label": "Currency",
+    "update_currency": "Update currency",
+    "social": {
+      "facebook": "Facebook",
+      "x": "X",
+      "instagram": "Instagram",
+      "tiktok": "TikTok"
+    }
+  },
+  "sale_grid": {
+    "countdown": {
+      "days": "Days",
+      "hours": "Hrs",
+      "minutes": "Min",
+      "seconds": "Sec"
+    }
+  },
+  "carousel": {
+    "previous": "Previous slide",
+    "next": "Next slide",
+    "go_to_slide": "Go to slide {{ index }}",
+    "scroll_left": "Scroll left",
+    "scroll_right": "Scroll right"
+  },
+  "new_arrivals": {
+    "add_to_cart": "Add to Cart",
+    "go_to_cart": "Go to Cart",
+    "quick_view": "Quick view {{ title }}",
+    "view_full_details": "View Full Details",
+    "buy_it_now": "Buy It Now",
+    "adding": "Adding...",
+    "added": "Added ✓",
+    "redirecting": "Redirecting...",
+    "sold_out": "Sold Out",
+    "close": "Close",
+    "decrease": "Decrease",
+    "increase": "Increase",
+    "quantity": "Quantity",
+    "size_label": "Size"
+  },
+  "pdp": {
+    "breadcrumb_label": "Breadcrumb",
+    "breadcrumb_home": "Home",
+    "breadcrumb_shop": "Shop",
+    "gallery": {
+      "view_image": "View image {{ index }}",
+      "thumbnail": "Thumbnail {{ index }}",
+      "placeholder": "Product · Bottle Front"
+    },
+    "info": {
+      "product": "Product",
+      "rated_out_of": "Rated {{ rating }} out of 5",
+      "review_count": "{{ count }} reviews",
+      "save_percent": "Save {{ percent }}%",
+      "size_discovery": "Discovery",
+      "size_standard": "Standard",
+      "size_extended": "Extended",
+      "qty_decrease": "Decrease quantity",
+      "qty_increase": "Increase quantity",
+      "qty_label": "Quantity",
+      "add_to_bag": "Add to Bag",
+      "sold_out": "Sold Out",
+      "wishlist_save": "Save to Wishlist",
+      "wishlist_saved": "Saved to Wishlist",
+      "save_percent_label": "Save"
+    },
+    "specs": {
+      "title": "Specifications",
+      "brand": "Brand",
+      "skin_type": "Skin Type",
+      "size": "Size",
+      "ingredients": "Ingredients",
+      "shipping": "Shipping & Return"
+    },
+    "reviews": {
+      "prev": "Previous testimonials",
+      "next": "Next testimonials",
+      "verified_buyer": "Verified Buyer"
+    }
   }
 }

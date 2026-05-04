@@ -1,5 +1,3 @@
-{{ 'section-category-carousel.css' | asset_url | stylesheet_tag }}
-
 {%- liquid
   assign cat_count = 0
   if section.blocks.size > 0
@@ -17,7 +15,7 @@
 -%}
 
 <section
-  class="cat-carousel section-{{ section.id }}"
+  class="cat-carousel"
   style="--section-padding-top: {{ section.settings.padding_top }}px; --section-padding-bottom: {{ section.settings.padding_bottom }}px;"
 >
   <div class="container">
@@ -38,7 +36,7 @@
     <div class="cat-carousel__row">
 
       {%- comment -%} Left arrow {%- endcomment -%}
-      <button class="cat-carousel__arrow cat-carousel__arrow--prev" aria-label="Scroll left">
+      <button class="cat-carousel__arrow cat-carousel__arrow--prev" aria-label="{{ 'carousel.scroll_left' | t }}">
         {{ 'icon-chevron-left.svg' | inline_asset_content }}
       </button>
 
@@ -108,7 +106,7 @@
 
           {%- if has_manual and section.settings.show_sale_category and collections['sale'] != blank -%}
             {%- assign sale_col = collections['sale'] -%}
-            <a href="{{ sale_col.url }}" class="cat-carousel__item cat-carousel__item--sale">
+            <a href="{{ sale_col.url }}" class="cat-carousel__item cat-carousel__item--sale" aria-label="{{ sale_col.title }}">
               <div class="cat-carousel__circle">
                 {%- if sale_col.image -%}
                   {{ sale_col.image | image_url: width: 300 | image_tag:
@@ -138,7 +136,7 @@
       </div>
 
       {%- comment -%} Right arrow {%- endcomment -%}
-      <button class="cat-carousel__arrow cat-carousel__arrow--next" aria-label="Scroll right">
+      <button class="cat-carousel__arrow cat-carousel__arrow--next" aria-label="{{ 'carousel.scroll_right' | t }}">
         {{ 'icon-chevron-right.svg' | inline_asset_content }}
       </button>
 
@@ -146,22 +144,152 @@
   </div>
 </section>
 
-<script>
-  (function () {
-    var section = document.querySelector('.cat-carousel.section-{{ section.id }}');
-    if (!section) return;
+{% stylesheet %}
+.cat-carousel { padding: var(--section-padding-top, 32px) 0 var(--section-padding-bottom, 32px); }
+.cat-carousel__header { text-align: center; margin-bottom: 32px; max-width: 640px; margin-left: auto; margin-right: auto; }
+.cat-carousel__subtitle {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-gray-500);
+  margin-bottom: 8px;
+}
+.cat-carousel__title {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-black);
+  margin-bottom: 12px;
+}
+.cat-carousel__description { font-family: var(--font-body); font-size: var(--text-base); line-height: 1.6; color: var(--color-gray-600); margin: 0; }
+.cat-carousel__row { display: flex; align-items: center; gap: 20px; }
+.cat-carousel__arrow {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--color-gray-200);
+  background: var(--color-white);
+  color: var(--color-black);
+  cursor: pointer;
+  transition: background var(--transition-fast),
+              color var(--transition-fast),
+              border-color var(--transition-fast),
+              opacity var(--transition-fast);
+  padding: 0;
+}
+.cat-carousel__arrow:hover:not(:disabled) { background: var(--color-black); color: var(--color-white); border-color: var(--color-black); }
+.cat-carousel__arrow:disabled { opacity: 0.25; cursor: default; }
+.cat-carousel__arrow.is-hidden { opacity: 0; pointer-events: none; }
+.cat-carousel__arrow svg { width: 18px; height: 18px; pointer-events: none; }
+.cat-carousel__track-wrapper { flex: 1; min-width: 0; position: relative; overflow: hidden; }
+.cat-carousel__fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cat-carousel__fade.is-visible { opacity: 1; }
+.cat-carousel__fade--left { left: 0; background: linear-gradient(to right, var(--color-white), transparent); }
+.cat-carousel__fade--right { right: 0; background: linear-gradient(to left, var(--color-white), transparent); }
+.cat-carousel__track {
+  display: flex;
+  gap: 40px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 12px 8px;
+  justify-content: flex-start;
+}
+.cat-carousel__track::-webkit-scrollbar { display: none; }
+.cat-carousel__item {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  scroll-snap-align: center;
+  min-width: 80px;
+}
+.cat-carousel__circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cat-carousel__item:hover .cat-carousel__label { font-weight: 600; color: var(--color-gray-600); }
+.cat-carousel__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cat-carousel__placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.cat-carousel__placeholder svg { width: 50%; opacity: 0.2; }
+.cat-carousel__label {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-black);
+  text-align: center;
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+.cat-carousel__item--sale .cat-carousel__label { font-weight: 600; }
+@media (min-width: 1200px) {
+  .cat-carousel__circle { width: 110px; height: 110px; }
+}
+@media (max-width: 768px) {
+  .cat-carousel { padding: 32px 0; }
+  .cat-carousel__header { margin-bottom: 24px; }
+  .cat-carousel__title { font-size: var(--text-2xl); }
+  .cat-carousel__description { font-size: var(--text-sm); }
+  .cat-carousel__row { gap: 8px; }
+  .cat-carousel__arrow { width: 36px; height: 36px; }
+  .cat-carousel__arrow svg { width: 14px; height: 14px; }
+  .cat-carousel__track { gap: 24px; justify-content: flex-start; padding: 8px 0; }
+  .cat-carousel__circle { width: 76px; height: 76px; }
+  .cat-carousel__label { font-size: var(--text-xs); }
+  .cat-carousel__fade { width: 28px; }
+}
+@media (max-width: 480px) {
+  .cat-carousel__circle { width: 64px; height: 64px; }
+  .cat-carousel__track { gap: 18px; }
+  .cat-carousel__arrow { width: 30px; height: 30px; }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  document.querySelectorAll('.cat-carousel').forEach(initCatCarousel);
+
+  function initCatCarousel(section) {
+    if (section.dataset.catInit === '1') return;
+    section.dataset.catInit = '1';
 
     var track = section.querySelector('.cat-carousel__track');
     var prevBtn = section.querySelector('.cat-carousel__arrow--prev');
     var nextBtn = section.querySelector('.cat-carousel__arrow--next');
     var fadeL = section.querySelector('.cat-carousel__fade--left');
     var fadeR = section.querySelector('.cat-carousel__fade--right');
+    if (!track || !prevBtn || !nextBtn) return;
 
     function getScrollAmount() {
       var item = track.querySelector('.cat-carousel__item');
       if (!item) return 300;
-      var style = getComputedStyle(track);
-      var gap = parseInt(style.gap) || 40;
+      var gap = parseInt(getComputedStyle(track).gap) || 40;
       return (item.offsetWidth + gap) * 3;
     }
 
@@ -169,76 +297,72 @@
       var sl = track.scrollLeft;
       var maxScroll = track.scrollWidth - track.clientWidth;
       var hasOverflow = track.scrollWidth > track.clientWidth + 4;
-
       prevBtn.disabled = sl <= 4;
       nextBtn.disabled = sl >= maxScroll - 4;
-
       prevBtn.classList.toggle('is-hidden', !hasOverflow);
       nextBtn.classList.toggle('is-hidden', !hasOverflow);
-
-      fadeL.classList.toggle('is-visible', sl > 8);
-      fadeR.classList.toggle('is-visible', sl < maxScroll - 8);
+      if (fadeL) fadeL.classList.toggle('is-visible', sl > 8);
+      if (fadeR) fadeR.classList.toggle('is-visible', sl < maxScroll - 8);
     }
 
     prevBtn.addEventListener('click', function () {
       track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
     });
-
     nextBtn.addEventListener('click', function () {
       track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
     });
-
     track.addEventListener('scroll', update, { passive: true });
-    update();
     window.addEventListener('resize', update);
-  })();
-</script>
+    update();
+  }
+})();
+{% endjavascript %}
 
 {% schema %}
 {
-  "name": "Category Carousel",
+  "name": "t:names.category_carousel",
   "tag": "section",
   "class": "section-category-carousel",
   "max_blocks": 16,
   "settings": [
     {
       "type": "header",
-      "content": "Heading"
+      "content": "t:labels.heading"
     },
     {
       "type": "text",
       "id": "subtitle",
-      "label": "Subtitle"
+      "label": "t:carousel_settings.subtitle"
     },
     {
       "type": "text",
       "id": "title",
-      "label": "Title"
+      "label": "t:labels.heading"
     },
     {
       "type": "textarea",
       "id": "description",
-      "label": "Description"
+      "label": "t:carousel_settings.description"
     },
     {
       "type": "header",
-      "content": "Sale category"
+      "content": "t:names.category"
     },
     {
       "type": "checkbox",
       "id": "show_sale_category",
-      "label": "Show 'Sale' category",
+      "label": "t:carousel_settings.show_sale_category",
       "default": true,
-      "info": "Displays a Sale circle at the end. Requires a collection with the handle 'sale'."
+      "info": "t:carousel_settings.show_sale_category_info"
     },
     {
       "type": "header",
-      "content": "Spacing"
+      "content": "t:carousel_settings.spacing"
     },
     {
       "type": "range",
       "id": "padding_top",
-      "label": "Padding top",
+      "label": "t:carousel_settings.padding_top",
       "min": 0,
       "max": 120,
       "step": 4,
@@ -248,7 +372,7 @@
     {
       "type": "range",
       "id": "padding_bottom",
-      "label": "Padding bottom",
+      "label": "t:carousel_settings.padding_bottom",
       "min": 0,
       "max": 120,
       "step": 4,
@@ -257,29 +381,29 @@
     },
     {
       "type": "header",
-      "content": "Categories"
+      "content": "t:carousel_settings.categories"
     },
     {
       "type": "paragraph",
-      "content": "Add blocks below to pick specific categories. Leave empty to auto-show all collections."
+      "content": "t:carousel_settings.categories_info"
     }
   ],
   "blocks": [
     {
       "type": "category",
-      "name": "Category",
+      "name": "t:names.category",
       "settings": [
         {
           "type": "collection",
           "id": "collection",
-          "label": "Collection"
+          "label": "t:carousel_settings.collection"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Category Carousel",
+      "name": "t:names.category_carousel",
       "blocks": []
     }
   ]

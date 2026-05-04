@@ -14,8 +14,25 @@
     "footer": {
       "type": "footer",
       "settings": {
-        "menu": "",
-        "show_payment_icons": true
+        "contact_hours": "Mon-Sat, 9am-6pm EST",
+        "phone": "+1 888-234-1234 (toll-free)",
+        "email": "touch@example.com",
+        "address": "382 NE 191st St #87394 Miami",
+        "newsletter_heading": "Join Our Newsletter",
+        "newsletter_text": "Sign up to our newsletter & receive 10% off your first order.",
+        "newsletter_placeholder": "Enter your email",
+        "newsletter_btn": "Sign Up",
+        "newsletter_consent": "By subscribing you agree to the",
+        "menu_company": "footer",
+        "menu_collection": "main-menu",
+        "menu_shop": "customer-account-main-menu",
+        "show_social": true,
+        "social_facebook": "#",
+        "social_x": "",
+        "social_instagram": "",
+        "social_tiktok": "",
+        "terms_url": "",
+        "privacy_url": ""
       }
     }
   },

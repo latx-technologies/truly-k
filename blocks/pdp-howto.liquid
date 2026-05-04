@@ -1,0 +1,86 @@
+{% doc %}
+  Renders the "How to Use" steps grid.
+
+  Reads steps from product.metafields.custom.how_to_use (list.metaobject).
+  Each step metaobject should expose: title, description, image.
+
+  Falls back to merchant-configurable defaults when no metafield is set.
+
+  @example
+  {% content_for 'block', type: 'pdp_howto', id: 'pdp-howto' %}
+{% enddoc %}
+
+{%- assign steps_mf = product.metafields.custom.how_to_use.value -%}
+
+<section class="pdp-howto" {{ block.shopify_attributes }}>
+  <div class="pdp__container">
+    <h2 class="pdp-howto__heading">{{ block.settings.heading | default: 'How to Use' }}</h2>
+
+    <div class="pdp-howto__grid">
+      {%- if steps_mf != blank -%}
+        {%- for step in steps_mf -%}
+          <div class="pdp-howto__step">
+            <div class="pdp-howto__img">
+              {%- if step.image.value -%}
+                {{ step.image.value | image_url: width: 600 | image_tag:
+                  loading: 'lazy', alt: step.title.value | default: 'Step image'
+                }}
+              {%- endif -%}
+            </div>
+            <div class="pdp-howto__num">{{ forloop.index }}.</div>
+            <h3 class="pdp-howto__step-title">{{ step.title.value }}</h3>
+            <p class="pdp-howto__desc">{{ step.description.value }}</p>
+          </div>
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign howto_titles = block.settings.fallback_titles | split: '|' -%}
+        {%- assign howto_descs  = block.settings.fallback_descriptions | split: '|' -%}
+        {%- for title in howto_titles -%}
+          <div class="pdp-howto__step">
+            <div class="pdp-howto__img pdp-howto__img--placeholder" data-step="{{ forloop.index }}"></div>
+            <div class="pdp-howto__num">{{ forloop.index }}.</div>
+            <h3 class="pdp-howto__step-title">{{ title }}</h3>
+            <p class="pdp-howto__desc">{{ howto_descs[forloop.index0] }}</p>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:pdp.howto.name",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "How to Use"
+    },
+    {
+      "type": "header",
+      "content": "t:pdp.howto.fallback_header"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:pdp.howto.fallback_info"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_titles",
+      "label": "t:pdp.howto.fallback_titles_label",
+      "info": "Pipe-separated (|).",
+      "default": "Cleanse First|Dispense Carefully|Press & Smooth|Let It Rest"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_descriptions",
+      "label": "t:pdp.howto.fallback_descriptions_label",
+      "info": "Pipe-separated (|), in the same order as titles.",
+      "default": "Begin with clean, dry skin. A gentle cleanser prepares the surface so the oil can absorb evenly.|Turn the dropper over and draw up 3–4 drops of oil — enough to cover the face and neck.|Warm the oil between your palms, then press gently into skin using upward, outward motions.|Allow a full minute to absorb before layering other products. Use nightly for cumulative restoration."
+    }
+  ],
+  "presets": [{ "name": "t:pdp.howto.name" }]
+}
+{% endschema %}

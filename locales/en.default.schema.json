@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "general": {
     "404": "Not found",
@@ -39,6 +48,7 @@
     "foreground": "Foreground",
     "grid_gap": "Grid spacing",
     "grid_item_width": "Grid item width",
+    "heading": "Heading",
     "input_corner_radius": "Input corner radius",
     "layout_direction": "Layout direction",
     "menu": "Menu",
@@ -72,6 +82,146 @@
       "title": "Title",
       "subtitle": "Subtitle",
       "normal": "Normal text"
+    }
+  },
+  "names": {
+    "header": "Header",
+    "footer": "Footer",
+    "hero_carousel": "Hero Carousel",
+    "category_carousel": "Category Carousel",
+    "sale_grid": "Sale Grid + Timer",
+    "promotional_banners": "Promotional Banners",
+    "new_arrivals": "New Arrivals",
+    "mega_menu_config": "Mega menu config",
+    "slide": "Slide",
+    "category": "Category",
+    "trust_badge": "Trust Badge",
+    "banner": "Banner"
+  },
+  "header_settings": {
+    "logo": "Logo",
+    "logo_image": "Logo image",
+    "navigation": "Navigation",
+    "main_menu": "Main menu",
+    "search": "Search",
+    "search_placeholder": "Search placeholder text",
+    "store_locator": "Store Locator",
+    "show_store_locator": "Show 'Find a Store' link",
+    "store_locator_url": "Store locator page URL",
+    "on_sale_button": "On Sale Button",
+    "show_on_sale": "Show 'On Sale' button",
+    "on_sale_text": "On Sale button text",
+    "on_sale_url": "On Sale button URL",
+    "menu_item_title": "Menu item title",
+    "menu_item_title_info": "Exact title of the nav item (e.g. Skincare, Hair Care). Must match your menu.",
+    "dropdown_variant": "Dropdown variant",
+    "variant_grid": "Grid – Left nav + image grid",
+    "variant_columns": "Columns – Four columns with products",
+    "featured_collection": "Featured collection (for Columns variant)",
+    "featured_collection_info": "Shows 3 products in the last column. Only used when variant is 'Columns'."
+  },
+  "footer_settings": {
+    "contact_information": "Contact information",
+    "customer_hours": "Customer service hours",
+    "phone": "Phone number",
+    "email": "Email address",
+    "address": "Address",
+    "newsletter": "Newsletter",
+    "description": "Description",
+    "email_placeholder": "Email placeholder",
+    "button_text": "Button text",
+    "consent_text": "Consent text (before links)",
+    "link_menus": "Link menus",
+    "company_menu": "Company menu",
+    "collection_menu": "Collection menu",
+    "shop_menu": "Shop menu",
+    "social_links": "Social links",
+    "show_social": "Show social icons",
+    "facebook_url": "Facebook URL",
+    "x_url": "X (Twitter) URL",
+    "instagram_url": "Instagram URL",
+    "tiktok_url": "TikTok URL",
+    "legal": "Legal",
+    "terms_url": "Terms of Service URL",
+    "privacy_url": "Privacy Policy URL"
+  },
+  "carousel_settings": {
+    "auto_rotate": "Auto-rotate slides",
+    "seconds_per_slide": "Seconds per slide",
+    "image": "Image",
+    "subtitle": "Subtitle",
+    "description": "Description",
+    "button_label": "Button label",
+    "button_link": "Button link",
+    "show_sale_category": "Show 'Sale' category",
+    "show_sale_category_info": "Displays a Sale circle at the end. Requires a collection with the handle 'sale'.",
+    "spacing": "Spacing",
+    "padding_top": "Padding top",
+    "padding_bottom": "Padding bottom",
+    "categories": "Categories",
+    "categories_info": "Add blocks below to pick specific categories. Leave empty to auto-show all collections.",
+    "collection": "Collection",
+    "show_badges": "Show trust badges",
+    "countdown_timer": "Countdown Timer",
+    "background_image": "Background image",
+    "end_date": "End date",
+    "end_date_info": "Format: YYYY-MM-DD (e.g. 2026-04-30)",
+    "end_time": "End time",
+    "end_time_info": "Format: HH:MM in 24-hour (e.g. 23:59 for 11:59 PM)",
+    "hide_after_expired": "Hide section after timer ends",
+    "hide_after_expired_info": "Automatically hides the entire section once the countdown reaches zero.",
+    "discount_text": "Discount badge text",
+    "discount_text_info": "e.g. 40% — leave empty to hide the badge",
+    "custom_label": "Custom label (optional)",
+    "custom_label_info": "Overrides the title",
+    "custom_image": "Custom image (optional)",
+    "custom_image_info": "Overrides the image",
+    "product": "Product",
+    "products_to_show": "Products to show",
+    "shop_all_label": "Shop all link text",
+    "promo_card": "Promo card (left side)",
+    "promo_image": "Promo image",
+    "promo_subtitle": "Promo subtitle",
+    "promo_heading": "Promo heading",
+    "promo_button_label": "Promo button label",
+    "promo_button_link": "Promo button link"
+  },
+  "pdp": {
+    "specs": {
+      "name": "PDP Specifications",
+      "fallback_header": "Fallback content",
+      "fallback_info": "Used when the product has no specs metafields set.",
+      "fallback_size_label": "Default size text",
+      "fallback_ingredients_label": "Default ingredients text",
+      "fallback_shipping_label": "Default shipping text"
     },
+    "howto": {
+      "name": "PDP How to Use",
+      "fallback_header": "Fallback steps",
+      "fallback_info": "Shown when the product has no how-to-use metaobject entries.",
+      "fallback_titles_label": "Step titles",
+      "fallback_descriptions_label": "Step descriptions"
+    },
+    "reviews": {
+      "name": "PDP Reviews",
+      "fallback_header": "Fallback reviews",
+      "fallback_info": "Shown when the product has no review metaobject entries.",
+      "fallback_names_label": "Reviewer names",
+      "fallback_initials_label": "Reviewer initials",
+      "fallback_quotes_label": "Reviewer quotes",
+      "fallback_products_label": "Linked products"
+    },
+    "ritual": {
+      "name": "PDP Complete the Ritual",
+      "eyebrow_label": "Eyebrow",
+      "view_all_label": "View all label",
+      "view_all_link": "View all link",
+      "fallback_header": "Fallback cards",
+      "fallback_info": "Shown when the product has no pairs_with metafield entries.",
+      "fallback_names_label": "Product names",
+      "fallback_types_label": "Product types",
+      "fallback_tags_label": "Image tags",
+      "fallback_prices_label": "Display prices"
+    }
   }
 }

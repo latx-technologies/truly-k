@@ -9,12 +9,198 @@
  */
 {
   "sections": {
-    "main": {
-      "type": "hello-world",
+    "hero_carousel_Y8Mkdq": {
+      "type": "hero-carousel",
+      "blocks": {
+        "slide_C4ELWb": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/Eyeshadowpalettenude-98d.webp",
+            "subtitle": "New Collection",
+            "heading": "Nurturing Your Creative Spirit",
+            "description": "Our industry-leading standards for product safety give you the power to make better.",
+            "button_label": "Shop Now",
+            "button_link": ""
+          }
+        },
+        "slide_Vw6WDi": {
+          "type": "slide",
+          "settings": {
+            "subtitle": "Best Sellers",
+            "heading": "Elegance In Every Detail",
+            "description": "Discover our curated selection of premium beauty essentials crafted for you.",
+            "button_label": "Explore",
+            "button_link": ""
+          }
+        },
+        "slide_EYRKJH": {
+          "type": "slide",
+          "settings": {
+            "subtitle": "Limited Edition",
+            "heading": "Where Beauty Meets Science",
+            "description": "Formulated with the finest ingredients for visible, lasting results.",
+            "button_label": "Shop Collection",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "slide_C4ELWb",
+        "slide_Vw6WDi",
+        "slide_EYRKJH"
+      ],
+      "name": "Hero Carousel",
+      "settings": {
+        "autoplay": true,
+        "autoplay_speed": 6
+      }
+    },
+    "category_carousel_KmhXTf": {
+      "type": "category-carousel",
+      "blocks": {
+        "category_kwtVfW": {
+          "type": "category",
+          "settings": {
+            "collection": "body-care"
+          }
+        },
+        "category_NkBQmL": {
+          "type": "category",
+          "settings": {
+            "collection": "best-sellers"
+          }
+        }
+      },
+      "block_order": [
+        "category_kwtVfW",
+        "category_NkBQmL"
+      ],
+      "name": "Category Carousel",
+      "settings": {
+        "subtitle": "",
+        "title": "",
+        "description": "",
+        "show_sale_category": false,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "new_arrivals_MnVrgj": {
+      "type": "new-arrivals",
+      "name": "New Arrivals",
+      "settings": {
+        "heading": "Daily Essentials",
+        "description": "Traditional divides between personal and professional space.",
+        "collection": "best-sellers",
+        "products_to_show": 12,
+        "view_all_label": "Shop All Products",
+        "promo_image": "shopify://shop_images/FaceSunscreen-15b.webp",
+        "promo_subtitle": "Big Saving",
+        "promo_heading": "On Holiday Sets",
+        "promo_button_label": "Explore Now",
+        "promo_button_link": ""
+      }
+    },
+    "sale_grid_rwLCa9": {
+      "type": "sale-grid",
+      "blocks": {
+        "product_tdACrJ": {
+          "type": "product",
+          "settings": {
+            "product": "bottle-grinder",
+            "custom_label": ""
+          }
+        },
+        "badge_yBb9EX": {
+          "type": "badge",
+          "settings": {
+            "badge_text": "Free Shipping"
+          }
+        },
+        "badge_HeDViG": {
+          "type": "badge",
+          "settings": {
+            "badge_text": "Money Guarantee"
+          }
+        },
+        "badge_WXaUGt": {
+          "type": "badge",
+          "settings": {
+            "badge_text": "Flexible Payment"
+          }
+        },
+        "badge_84tVW7": {
+          "type": "badge",
+          "settings": {
+            "badge_text": "Online Support"
+          }
+        },
+        "badge_yw7HEi": {
+          "type": "badge",
+          "settings": {
+            "badge_text": "Return Within 7 Days"
+          }
+        }
+      },
+      "block_order": [
+        "product_tdACrJ",
+        "badge_yBb9EX",
+        "badge_HeDViG",
+        "badge_WXaUGt",
+        "badge_84tVW7",
+        "badge_yw7HEi"
+      ],
+      "name": "Sale Grid + Timer",
+      "settings": {
+        "heading": "Take the time you deserve, and let beauty shine within you",
+        "show_badges": true,
+        "timer_image": "shopify://shop_images/bodyscrub-61c.webp",
+        "timer_subtitle": "Countdown Is On",
+        "timer_heading": "Holiday Season Sale",
+        "countdown_date": "2026-03-20",
+        "countdown_time": "21:18",
+        "hide_after_expired": true,
+        "timer_button_label": "Shop The Sale",
+        "timer_button_link": ""
+      }
+    },
+    "promotional_banner_grid_4bCq8b": {
+      "type": "promotional-banner-grid",
+      "blocks": {
+        "banner_bRtcT7": {
+          "type": "banner",
+          "settings": {
+            "subtitle": "Holiday Gifts",
+            "heading": "Cleansing Set For Sensitive Skin",
+            "discount_text": "40%",
+            "button_label": "Shop Now",
+            "button_link": ""
+          }
+        },
+        "banner_jEFVzm": {
+          "type": "banner",
+          "settings": {
+            "subtitle": "Holiday Gifts",
+            "heading": "Pastel Bathroom Coutertop",
+            "discount_text": "30%",
+            "button_label": "Shop Now",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "banner_bRtcT7",
+        "banner_jEFVzm"
+      ],
+      "name": "Promotional Banners",
       "settings": {}
     }
   },
   "order": [
-    "main"
+    "hero_carousel_Y8Mkdq",
+    "category_carousel_KmhXTf",
+    "new_arrivals_MnVrgj",
+    "sale_grid_rwLCa9",
+    "promotional_banner_grid_4bCq8b"
   ]
 }

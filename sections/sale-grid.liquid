@@ -1,5 +1,3 @@
-{{ 'section-sale-grid.css' | asset_url | stylesheet_tag }}
-
 {%- liquid
   assign end_date = section.settings.countdown_date | default: ''
   assign end_time = section.settings.countdown_time | default: '00:00'
@@ -8,7 +6,7 @@
 -%}
 
 <section
-  class="sale-grid section-{{ section.id }}"
+  class="sale-grid"
   {% if hide_expired and end_date != blank %}
     data-expires="{{ end_datetime }}"
     data-hide-expired="true"
@@ -60,22 +58,22 @@
             <div class="sale-grid__countdown" data-end="{{ end_datetime }}">
               <div class="sale-grid__countdown-unit">
                 <span class="sale-grid__countdown-num" data-days>00</span>
-                <span class="sale-grid__countdown-label">Days</span>
+                <span class="sale-grid__countdown-label">{{ 'sale_grid.countdown.days' | t }}</span>
               </div>
               <span class="sale-grid__countdown-sep">:</span>
               <div class="sale-grid__countdown-unit">
                 <span class="sale-grid__countdown-num" data-hours>00</span>
-                <span class="sale-grid__countdown-label">Hrs</span>
+                <span class="sale-grid__countdown-label">{{ 'sale_grid.countdown.hours' | t }}</span>
               </div>
               <span class="sale-grid__countdown-sep">:</span>
               <div class="sale-grid__countdown-unit">
                 <span class="sale-grid__countdown-num" data-mins>00</span>
-                <span class="sale-grid__countdown-label">Min</span>
+                <span class="sale-grid__countdown-label">{{ 'sale_grid.countdown.minutes' | t }}</span>
               </div>
               <span class="sale-grid__countdown-sep">:</span>
               <div class="sale-grid__countdown-unit">
                 <span class="sale-grid__countdown-num" data-secs>00</span>
-                <span class="sale-grid__countdown-label">Sec</span>
+                <span class="sale-grid__countdown-label">{{ 'sale_grid.countdown.seconds' | t }}</span>
               </div>
             </div>
           {%- endif -%}
@@ -182,211 +180,356 @@
   </div>
 </section>
 
-<script>
+{% stylesheet %}
+.sale-grid { padding: 80px 0; }
+.sale-grid__top { text-align: center; margin-bottom: 40px; }
+.sale-grid__heading {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-black);
+  max-width: 600px;
+  margin: 0 auto 24px;
+}
+.sale-grid__badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.sale-grid__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-black);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 100px;
+  white-space: nowrap;
+}
+.sale-grid__badge svg { flex-shrink: 0; color: var(--color-black); }
+.sale-grid__layout { display: grid; grid-template-columns: 1fr 3fr; gap: 16px; }
+.sale-grid__timer-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-black);
+  display: flex;
+  align-items: flex-end;
+  min-height: 100%;
+  grid-row: 1 / -1;
+}
+.sale-grid__timer-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.sale-grid__timer-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.15) 100%);
+}
+.sale-grid__timer-content { position: relative; z-index: 1; padding: 32px 28px; display: flex; flex-direction: column; gap: 14px; }
+.sale-grid__timer-subtitle { font-family: var(--font-display); font-size: var(--text-base); font-style: italic; color: var(--color-gray-300); }
+.sale-grid__timer-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 500;
+  color: var(--color-white);
+  line-height: 1.15;
+}
+.sale-grid__countdown { display: flex; align-items: center; gap: 6px; }
+.sale-grid__countdown-unit { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.sale-grid__countdown-num {
+  font-family: var(--font-body);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-white);
+  min-width: 36px;
+  text-align: center;
+  line-height: 1;
+}
+.sale-grid__countdown-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-gray-400);
+}
+.sale-grid__countdown-sep {
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gray-400);
+  margin: 0 2px;
+  align-self: flex-start;
+  line-height: 1;
+}
+.sale-grid__timer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--color-white);
+  color: var(--color-black);
+  border: none;
+  text-decoration: none;
+  align-self: flex-start;
+  transition: var(--transition-fast);
+  margin-top: 4px;
+}
+.sale-grid__timer-btn:hover { background: var(--color-gray-100); }
+.sale-grid__timer-btn span { position: relative; z-index: 1; }
+.sale-grid__categories { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.sale-grid__cat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  background: var(--color-gray-100);
+  padding: 24px 16px 20px;
+  transition: background var(--transition-fast);
+}
+.sale-grid__cat-card:hover { background: var(--color-gray-200); }
+.sale-grid__cat-image { width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.sale-grid__cat-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sale-grid__cat-card:hover .sale-grid__cat-img { transform: scale(1.06); }
+.sale-grid__cat-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.sale-grid__cat-placeholder svg { width: 50%; opacity: 0.2; }
+.sale-grid__cat-name { font-family: var(--font-body); font-size: var(--text-sm); font-weight: 500; color: var(--color-black); text-align: center; }
+.sale-grid__cat-price { display: flex; align-items: baseline; justify-content: center; gap: 6px; margin-top: 4px; }
+.sale-grid__cat-price--sale { font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600; color: var(--color-black); }
+.sale-grid__cat-price--was { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-gray-400); text-decoration: line-through; }
+@media (max-width: 1024px) {
+  .sale-grid__categories { grid-template-columns: repeat(3, 1fr); }
+  .sale-grid__layout { grid-template-columns: 1fr 2.5fr; }
+}
+@media (max-width: 768px) {
+  .sale-grid { padding: 48px 0; }
+  .sale-grid__layout { grid-template-columns: 1fr; }
+  .sale-grid__timer-card { min-height: 320px; }
+  .sale-grid__categories { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .sale-grid__cat-image { width: 80px; height: 80px; }
+  .sale-grid__cat-card { padding: 16px 10px 14px; }
+  .sale-grid__badges { gap: 6px; }
+  .sale-grid__badge { padding: 6px 12px; font-size: 10px; }
+  .sale-grid__top { margin-bottom: 28px; }
+}
+@media (max-width: 480px) {
+  .sale-grid__categories { grid-template-columns: repeat(2, 1fr); }
+  .sale-grid__cat-image { width: 64px; height: 64px; }
+  .sale-grid__cat-name { font-size: var(--text-xs); }
+  .sale-grid__countdown-num { font-size: var(--text-xl); }
+}
+{% endstylesheet %}
+
+{% javascript %}
 (function () {
-  var sectionEl = document.querySelector('.sale-grid.section-{{ section.id }}');
-  if (!sectionEl) return;
+  document.querySelectorAll('.sale-grid').forEach(initSaleGrid);
 
-  var countdownEl = sectionEl.querySelector('.sale-grid__countdown');
-  var hideExpired = sectionEl.getAttribute('data-hide-expired') === 'true';
-  var expiresAt = sectionEl.getAttribute('data-expires');
+  function initSaleGrid(sectionEl) {
+    if (sectionEl.dataset.saleInit === '1') return;
+    sectionEl.dataset.saleInit = '1';
 
-  if (hideExpired && expiresAt) {
-    var endMs = new Date(expiresAt).getTime();
-    if (Date.now() >= endMs) {
-      sectionEl.style.display = 'none';
-      return;
-    }
-  }
+    var countdownEl = sectionEl.querySelector('.sale-grid__countdown');
+    var hideExpired = sectionEl.getAttribute('data-hide-expired') === 'true';
+    var expiresAt = sectionEl.getAttribute('data-expires');
 
-  if (!countdownEl) return;
-
-  var endDate = new Date(countdownEl.getAttribute('data-end')).getTime();
-  var daysEl = countdownEl.querySelector('[data-days]');
-  var hoursEl = countdownEl.querySelector('[data-hours]');
-  var minsEl = countdownEl.querySelector('[data-mins]');
-  var secsEl = countdownEl.querySelector('[data-secs]');
-  var interval;
-
-  function pad(n) { return n < 10 ? '0' + n : n; }
-
-  function tick() {
-    var now = Date.now();
-    var diff = endDate - now;
-
-    if (diff <= 0) {
-      daysEl.textContent = '00';
-      hoursEl.textContent = '00';
-      minsEl.textContent = '00';
-      secsEl.textContent = '00';
-      clearInterval(interval);
-
-      if (hideExpired) {
-        sectionEl.style.transition = 'opacity 0.6s ease';
-        sectionEl.style.opacity = '0';
-        setTimeout(function () {
-          sectionEl.style.display = 'none';
-        }, 600);
+    if (hideExpired && expiresAt) {
+      var endMs = new Date(expiresAt).getTime();
+      if (Date.now() >= endMs) {
+        sectionEl.style.display = 'none';
+        return;
       }
-      return;
+    }
+    if (!countdownEl) return;
+
+    var endDate = new Date(countdownEl.getAttribute('data-end')).getTime();
+    var daysEl = countdownEl.querySelector('[data-days]');
+    var hoursEl = countdownEl.querySelector('[data-hours]');
+    var minsEl = countdownEl.querySelector('[data-mins]');
+    var secsEl = countdownEl.querySelector('[data-secs]');
+    var interval;
+
+    function pad(n) { return n < 10 ? '0' + n : n; }
+
+    function tick() {
+      var diff = endDate - Date.now();
+      if (diff <= 0) {
+        daysEl.textContent = '00';
+        hoursEl.textContent = '00';
+        minsEl.textContent = '00';
+        secsEl.textContent = '00';
+        clearInterval(interval);
+        if (hideExpired) {
+          sectionEl.style.transition = 'opacity 0.6s ease';
+          sectionEl.style.opacity = '0';
+          setTimeout(function () { sectionEl.style.display = 'none'; }, 600);
+        }
+        return;
+      }
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor((diff % 86400000) / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      daysEl.textContent = pad(d);
+      hoursEl.textContent = pad(h);
+      minsEl.textContent = pad(m);
+      secsEl.textContent = pad(s);
     }
 
-    var d = Math.floor(diff / 86400000);
-    var h = Math.floor((diff % 86400000) / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    var s = Math.floor((diff % 60000) / 1000);
-
-    daysEl.textContent = pad(d);
-    hoursEl.textContent = pad(h);
-    minsEl.textContent = pad(m);
-    secsEl.textContent = pad(s);
+    tick();
+    interval = setInterval(tick, 1000);
   }
-
-  tick();
-  interval = setInterval(tick, 1000);
 })();
-</script>
+{% endjavascript %}
 
 {% schema %}
 {
-  "name": "Sale Grid + Timer",
+  "name": "t:names.sale_grid",
   "tag": "section",
   "class": "section-sale-grid",
   "max_blocks": 24,
   "settings": [
     {
       "type": "header",
-      "content": "Heading"
+      "content": "t:labels.heading"
     },
     {
       "type": "textarea",
       "id": "heading",
-      "label": "Heading",
+      "label": "t:labels.heading",
       "default": "Take the time you deserve, and let beauty shine within you"
     },
     {
       "type": "checkbox",
       "id": "show_badges",
-      "label": "Show trust badges",
+      "label": "t:carousel_settings.show_badges",
       "default": true
     },
     {
       "type": "header",
-      "content": "Countdown Timer"
+      "content": "t:carousel_settings.countdown_timer"
     },
     {
       "type": "image_picker",
       "id": "timer_image",
-      "label": "Background image"
+      "label": "t:carousel_settings.background_image"
     },
     {
       "type": "text",
       "id": "timer_subtitle",
-      "label": "Subtitle",
+      "label": "t:carousel_settings.subtitle",
       "default": "Countdown Is On"
     },
     {
       "type": "text",
       "id": "timer_heading",
-      "label": "Heading",
+      "label": "t:labels.heading",
       "default": "Holiday Season Sale"
     },
     {
       "type": "text",
       "id": "countdown_date",
-      "label": "End date",
-      "info": "Format: YYYY-MM-DD (e.g. 2026-04-30)",
+      "label": "t:carousel_settings.end_date",
+      "info": "t:carousel_settings.end_date_info",
       "default": "2026-04-30"
     },
     {
       "type": "text",
       "id": "countdown_time",
-      "label": "End time",
-      "info": "Format: HH:MM in 24-hour (e.g. 23:59 for 11:59 PM)",
+      "label": "t:carousel_settings.end_time",
+      "info": "t:carousel_settings.end_time_info",
       "default": "23:59"
     },
     {
       "type": "checkbox",
       "id": "hide_after_expired",
-      "label": "Hide section after timer ends",
+      "label": "t:carousel_settings.hide_after_expired",
       "default": true,
-      "info": "Automatically hides the entire section once the countdown reaches zero."
+      "info": "t:carousel_settings.hide_after_expired_info"
     },
     {
       "type": "text",
       "id": "timer_button_label",
-      "label": "Button label",
+      "label": "t:carousel_settings.button_label",
       "default": "Shop The Sale"
     },
     {
       "type": "url",
       "id": "timer_button_link",
-      "label": "Button link"
+      "label": "t:carousel_settings.button_link"
     }
   ],
   "blocks": [
     {
       "type": "badge",
-      "name": "Trust Badge",
+      "name": "t:names.trust_badge",
       "settings": [
         {
           "type": "text",
           "id": "badge_text",
-          "label": "Text",
+          "label": "t:labels.text",
           "default": "Free Shipping"
         }
       ]
     },
     {
       "type": "category",
-      "name": "Category",
+      "name": "t:names.category",
       "settings": [
         {
           "type": "collection",
           "id": "collection",
-          "label": "Collection"
+          "label": "t:carousel_settings.collection"
         },
         {
           "type": "text",
           "id": "custom_label",
-          "label": "Custom label (optional)",
-          "info": "Overrides the collection title"
+          "label": "t:carousel_settings.custom_label",
+          "info": "t:carousel_settings.custom_label_info"
         },
         {
           "type": "image_picker",
           "id": "custom_image",
-          "label": "Custom image (optional)",
-          "info": "Overrides the collection image"
+          "label": "t:carousel_settings.custom_image",
+          "info": "t:carousel_settings.custom_image_info"
         }
       ]
     },
     {
       "type": "product",
-      "name": "Product",
+      "name": "t:carousel_settings.product",
       "settings": [
         {
           "type": "product",
           "id": "product",
-          "label": "Product"
+          "label": "t:carousel_settings.product"
         },
         {
           "type": "text",
           "id": "custom_label",
-          "label": "Custom label (optional)",
-          "info": "Overrides the product title"
+          "label": "t:carousel_settings.custom_label",
+          "info": "t:carousel_settings.custom_label_info"
         },
         {
           "type": "image_picker",
           "id": "custom_image",
-          "label": "Custom image (optional)",
-          "info": "Overrides the product image"
+          "label": "t:carousel_settings.custom_image",
+          "info": "t:carousel_settings.custom_image_info"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Sale Grid + Timer",
+      "name": "t:names.sale_grid",
       "blocks": [
         { "type": "badge", "settings": { "badge_text": "Free Shipping" } },
         { "type": "badge", "settings": { "badge_text": "Money Guarantee" } },

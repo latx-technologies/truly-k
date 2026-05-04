@@ -13,10 +13,31 @@
   "sections": {
     "header": {
       "type": "header",
-      "settings": {}
+      "blocks": {
+        "mega_menu_CpVFxL": {
+          "type": "mega_menu",
+          "settings": {
+            "menu_item_title": "Skincare",
+            "variant": "columns",
+            "featured_collection": "best-sellers"
+          }
+        }
+      },
+      "block_order": [
+        "mega_menu_CpVFxL"
+      ],
+      "settings": {
+        "menu": "main-menu",
+        "search_placeholder": "What are you looking for?",
+        "show_store_locator": true,
+        "store_locator_url": "",
+        "show_on_sale_link": true,
+        "on_sale_text": "On Sale",
+        "on_sale_url": ""
+      }
     }
   },
   "order": [
     "header"
-  ],
+  ]
 }

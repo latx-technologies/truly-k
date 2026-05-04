@@ -1,0 +1,150 @@
+{% doc %}
+  Renders the verified-buyer testimonials carousel.
+
+  Reads from product.metafields.reviews.items (list.metaobject).
+  Each review metaobject should expose: author, quote, verified, avatar,
+  photo, product (product_reference).
+
+  Reviews where `verified` is explicitly false are skipped.
+
+  @example
+  {% content_for 'block', type: 'pdp_reviews', id: 'pdp-reviews' %}
+{% enddoc %}
+
+{%- assign reviews_mf = product.metafields.reviews.items.value -%}
+
+<section class="pdp-reviews" {{ block.shopify_attributes }}>
+  <div class="pdp__container">
+    <div class="pdp-reviews__head">
+      <h2 class="pdp-reviews__heading">{{ block.settings.heading | default: 'Clients Love Us' }}</h2>
+      <div class="pdp-reviews__nav" data-reviews-nav>
+        <button type="button" class="pdp-reviews__arrow" data-reviews-prev aria-label="{{ 'pdp.reviews.prev' | t }}">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <button type="button" class="pdp-reviews__arrow" data-reviews-next aria-label="{{ 'pdp.reviews.next' | t }}">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="pdp-reviews__track" data-reviews-track>
+      {%- if reviews_mf != blank -%}
+        {%- for review in reviews_mf -%}
+          {%- if review.verified.value == false -%}{%- continue -%}{%- endif -%}
+          <article class="pdp-review">
+            <div class="pdp-review__top">
+              <div class="pdp-review__id">
+                <div class="pdp-review__avatar">
+                  {%- if review.avatar.value -%}
+                    {{ review.avatar.value | image_url: width: 80 | image_tag: alt: review.author.value }}
+                  {%- else -%}
+                    <span>{{ review.author.value | slice: 0, 1 }}</span>
+                  {%- endif -%}
+                </div>
+                <div>
+                  <div class="pdp-review__name">{{ review.author.value }}</div>
+                  <div class="pdp-review__badge">{{ 'pdp.reviews.verified_buyer' | t }}</div>
+                </div>
+              </div>
+              <div class="pdp-review__photo">
+                {%- if review.photo.value -%}
+                  {{ review.photo.value | image_url: width: 300 | image_tag: alt: '' }}
+                {%- endif -%}
+              </div>
+            </div>
+            <p class="pdp-review__quote">“{{ review.quote.value }}”</p>
+            {%- if review.product.value -%}
+              <hr class="pdp-review__rule" />
+              <a class="pdp-review__product" href="{{ review.product.value.url }}">
+                {%- if review.product.value.featured_image -%}
+                  {{ review.product.value.featured_image | image_url: width: 80 | image_tag: alt: review.product.value.title }}
+                {%- else -%}
+                  <span class="pdp-review__product-thumb"></span>
+                {%- endif -%}
+                <span>{{ review.product.value.title }}</span>
+              </a>
+            {%- endif -%}
+          </article>
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign r_names    = block.settings.fallback_names    | split: '|' -%}
+        {%- assign r_initials = block.settings.fallback_initials | split: '|' -%}
+        {%- assign r_quotes   = block.settings.fallback_quotes   | split: '|' -%}
+        {%- assign r_products = block.settings.fallback_products | split: '|' -%}
+        {%- for name in r_names -%}
+          <article class="pdp-review">
+            <div class="pdp-review__top">
+              <div class="pdp-review__id">
+                <div class="pdp-review__avatar" data-avatar="{{ forloop.index }}">
+                  <span>{{ r_initials[forloop.index0] }}</span>
+                </div>
+                <div>
+                  <div class="pdp-review__name">{{ name }}</div>
+                  <div class="pdp-review__badge">{{ 'pdp.reviews.verified_buyer' | t }}</div>
+                </div>
+              </div>
+              <div class="pdp-review__photo pdp-review__photo--placeholder" data-photo="{{ forloop.index }}"></div>
+            </div>
+            <p class="pdp-review__quote">“{{ r_quotes[forloop.index0] }}”</p>
+            <hr class="pdp-review__rule" />
+            <div class="pdp-review__product">
+              <span class="pdp-review__product-thumb" data-thumb="{{ forloop.index }}"></span>
+              <span>{{ r_products[forloop.index0] }}</span>
+            </div>
+          </article>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:pdp.reviews.name",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Clients Love Us"
+    },
+    {
+      "type": "header",
+      "content": "t:pdp.reviews.fallback_header"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:pdp.reviews.fallback_info"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_names",
+      "label": "t:pdp.reviews.fallback_names_label",
+      "info": "Pipe-separated (|).",
+      "default": "Jenny W.|Stephanie R.|Rachel M.|Emily A.|Priya S."
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_initials",
+      "label": "t:pdp.reviews.fallback_initials_label",
+      "info": "Pipe-separated (|), one per name.",
+      "default": "J|S|R|E|P"
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_quotes",
+      "label": "t:pdp.reviews.fallback_quotes_label",
+      "info": "Pipe-separated (|), one per name.",
+      "default": "This was a wonderful way to try the brand for the first time — I highly recommend all of their products. The oil melts in beautifully and I will definitely be repurchasing.|The story behind the formula and the sustainable production really sold me. Arrived in lovely packaging, and the free return policy meant no risk.|High-quality, crafted with obvious care. Fantastic in appearance and in use — reasonably priced for the results I have seen over six weeks.|I have always loved the brand, and this serum fits right in. My skin feels calmer in the morning and the scent is so subtle.|I was skeptical about oils on oily skin, but this one is weightless. No breakouts, just a quiet glow after about two weeks of nightly use."
+    },
+    {
+      "type": "textarea",
+      "id": "fallback_products",
+      "label": "t:pdp.reviews.fallback_products_label",
+      "info": "Pipe-separated (|), one per name.",
+      "default": "Balancing Hypotonic|Blanca Scented Candle|Brighten Cleanser|Citrus Scrub|Midnight Renewal Oil"
+    }
+  ],
+  "presets": [{ "name": "t:pdp.reviews.name" }]
+}
+{% endschema %}
