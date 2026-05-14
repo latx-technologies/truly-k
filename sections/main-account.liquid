@@ -1,0 +1,373 @@
+{% comment %}
+  Used by templates/customers/account.json to render the signed-in customer's
+  dashboard. Shows account summary, recent orders, and the default address.
+{% endcomment %}
+
+{%- liquid
+  assign order_limit = section.settings.order_limit | default: 5
+-%}
+
+<section
+  class="account-dashboard"
+  style="
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="container">
+    <header class="account-dashboard__header">
+      <div class="account-dashboard__greeting">
+        <span class="account-dashboard__eyebrow text-label">{{ 'customer.account.eyebrow' | t }}</span>
+        <h1 class="account-dashboard__title heading-section-lg">
+          {%- if customer.first_name != blank -%}
+            {{ 'customer.account.welcome_named' | t: name: customer.first_name }}
+          {%- else -%}
+            {{ 'customer.account.welcome' | t }}
+          {%- endif -%}
+        </h1>
+        {%- if section.settings.intro != blank -%}
+          <p class="account-dashboard__intro text-lead">{{ section.settings.intro }}</p>
+        {%- endif -%}
+      </div>
+    </header>
+
+    <div class="account-dashboard__layout">
+      <aside class="account-dashboard__sidebar">
+        {% render 'account-nav', active: 'dashboard' %}
+      </aside>
+
+      <div class="account-dashboard__main">
+
+        {%- comment -%} Recent orders {%- endcomment -%}
+        <section class="account-panel">
+          <header class="account-panel__header">
+            <h2 class="account-panel__title heading-card">{{ 'customer.account.orders.title' | t }}</h2>
+            {%- if customer.orders.size > order_limit -%}
+              <a href="#all-orders" class="account-panel__action link-arrow">
+                {{ 'customer.account.orders.view_all' | t }}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </a>
+            {%- endif -%}
+          </header>
+
+          {%- if customer.orders.size > 0 -%}
+            <div class="account-panel__table-wrap">
+              <table class="account-table">
+                <thead>
+                  <tr>
+                    <th scope="col">{{ 'customer.account.orders.order_number' | t }}</th>
+                    <th scope="col">{{ 'customer.account.orders.order_date' | t }}</th>
+                    <th scope="col">{{ 'customer.account.orders.payment_status' | t }}</th>
+                    <th scope="col">{{ 'customer.account.orders.fulfillment_status' | t }}</th>
+                    <th scope="col" class="account-table__total">{{ 'customer.account.orders.total' | t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {%- paginate customer.orders by order_limit -%}
+                    {%- for order in customer.orders -%}
+                      <tr>
+                        <th scope="row">
+                          <a href="{{ order.customer_url }}" class="account-table__order-link">{{ order.name }}</a>
+                        </th>
+                        <td>{{ order.created_at | date: format: 'date' }}</td>
+                        <td>
+                          <span class="account-status account-status--{{ order.financial_status }}">
+                            {{ order.financial_status_label }}
+                          </span>
+                        </td>
+                        <td>
+                          <span class="account-status account-status--{{ order.fulfillment_status | default: 'unfulfilled' }}">
+                            {{ order.fulfillment_status_label }}
+                          </span>
+                        </td>
+                        <td class="account-table__total">{{ order.total_price | money }}</td>
+                      </tr>
+                    {%- endfor -%}
+
+                    {%- if paginate.pages > 1 -%}
+                      <tr class="account-table__pagination-row">
+                        <td colspan="5">{{ paginate | default_pagination }}</td>
+                      </tr>
+                    {%- endif -%}
+                  {%- endpaginate -%}
+                </tbody>
+              </table>
+            </div>
+          {%- else -%}
+            <p class="account-panel__empty">{{ 'customer.account.no_orders' | t }}</p>
+          {%- endif -%}
+        </section>
+
+        {%- comment -%} Default address {%- endcomment -%}
+        <section class="account-panel">
+          <header class="account-panel__header">
+            <h2 class="account-panel__title heading-card">{{ 'customer.account.address.title' | t }}</h2>
+            <a href="{{ routes.account_addresses_url }}" class="account-panel__action link-arrow">
+              {{ 'customer.account.address.manage' | t }}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+          </header>
+
+          {%- if customer.default_address -%}
+            <div class="account-address-card">
+              <span class="account-address-card__badge text-label">{{ 'customer.account.address.default_badge' | t }}</span>
+              <address class="account-address-card__body">
+                {{ customer.default_address | format_address }}
+              </address>
+            </div>
+          {%- else -%}
+            <p class="account-panel__empty">{{ 'customer.account.address.empty' | t }}</p>
+          {%- endif -%}
+        </section>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .account-dashboard {
+    padding: var(--section-padding-top, 64px) 0 var(--section-padding-bottom, 64px);
+  }
+
+  .account-dashboard__header {
+    margin-bottom: 48px;
+  }
+
+  .account-dashboard__greeting {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 720px;
+  }
+
+  .account-dashboard__eyebrow { margin: 0; }
+  .account-dashboard__title { margin: 0; }
+  .account-dashboard__intro { margin: 4px 0 0; }
+
+  .account-dashboard__layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 320px) 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .account-dashboard__sidebar {
+    position: sticky;
+    top: 32px;
+  }
+
+  .account-dashboard__main {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    min-width: 0;
+  }
+
+  .account-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 32px;
+    border: 1px solid var(--color-gray-200);
+    background: var(--color-white);
+  }
+
+  .account-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .account-panel__title {
+    margin: 0;
+  }
+
+  .account-panel__action {
+    font-size: var(--text-xs);
+  }
+
+  .account-panel__empty {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-gray-500);
+    margin: 0;
+    padding: 16px 0;
+  }
+
+  .account-panel__table-wrap {
+    overflow-x: auto;
+    margin: 0 -8px;
+    padding: 0 8px;
+  }
+
+  .account-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+  }
+
+  .account-table th,
+  .account-table td {
+    text-align: left;
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--color-gray-200);
+    vertical-align: middle;
+  }
+
+  .account-table thead th {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-gray-500);
+    border-bottom: 1.5px solid var(--color-black);
+  }
+
+  .account-table tbody th {
+    font-weight: 600;
+    color: var(--color-black);
+  }
+
+  .account-table__order-link {
+    color: var(--color-black);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+    transition: color var(--transition-fast);
+  }
+
+  .account-table__order-link:hover { color: var(--color-gray-600); }
+
+  .account-table__total { text-align: right; white-space: nowrap; }
+
+  .account-table__pagination-row td {
+    padding-top: 24px;
+    border-bottom: none;
+  }
+
+  .account-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: var(--color-gray-100);
+    color: var(--color-gray-700);
+    border: 1px solid var(--color-gray-200);
+  }
+
+  .account-status--paid,
+  .account-status--fulfilled {
+    background: var(--color-black);
+    color: var(--color-white);
+    border-color: var(--color-black);
+  }
+
+  .account-status--refunded,
+  .account-status--voided {
+    background: var(--color-white);
+    color: var(--color-gray-500);
+    border-color: var(--color-gray-300);
+  }
+
+  .account-address-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 24px;
+    background: var(--color-gray-100);
+    border-left: 3px solid var(--color-black);
+  }
+
+  .account-address-card__badge {
+    margin: 0;
+  }
+
+  .account-address-card__body {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--color-black);
+    font-style: normal;
+    white-space: pre-line;
+  }
+
+  @media (max-width: 900px) {
+    .account-dashboard__layout {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .account-dashboard__sidebar {
+      position: static;
+    }
+    .account-panel {
+      padding: 24px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .account-dashboard {
+      padding: 48px 0;
+    }
+    .account-dashboard__header {
+      margin-bottom: 32px;
+    }
+    .account-table th,
+    .account-table td {
+      padding: 12px 8px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.main_account",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "t:account_settings.intro_text",
+      "default": "Review your recent orders, manage shipping addresses, and update your account details."
+    },
+    {
+      "type": "range",
+      "id": "order_limit",
+      "label": "t:account_settings.order_limit",
+      "min": 3,
+      "max": 20,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "t:carousel_settings.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:carousel_settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:carousel_settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

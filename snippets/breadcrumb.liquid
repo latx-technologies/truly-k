@@ -1,0 +1,106 @@
+{% doc %}
+  Renders a breadcrumb trail. Auto-detects context (home → collection / product / article / page).
+
+  @example
+  {% render 'breadcrumb' %}
+{% enddoc %}
+
+<nav class="breadcrumb" aria-label="{{ 'general.breadcrumb.label' | t }}">
+  <ol class="breadcrumb__list">
+    <li class="breadcrumb__item">
+      <a href="{{ routes.root_url }}" class="breadcrumb__link">{{ 'general.breadcrumb.home' | t }}</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+    </li>
+
+    {%- if template.name == 'collection' -%}
+      <li class="breadcrumb__item">
+        <a href="{{ routes.collections_url }}" class="breadcrumb__link">{{ 'general.breadcrumb.collections' | t }}</a>
+        <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      </li>
+      <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
+        <span class="breadcrumb__current">{{ collection.title }}</span>
+      </li>
+
+    {%- elsif template.name == 'product' -%}
+      {%- if collection -%}
+        <li class="breadcrumb__item">
+          <a href="{{ collection.url }}" class="breadcrumb__link">{{ collection.title }}</a>
+          <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        </li>
+      {%- else -%}
+        <li class="breadcrumb__item">
+          <a href="{{ routes.collections_url }}" class="breadcrumb__link">{{ 'general.breadcrumb.collections' | t }}</a>
+          <span class="breadcrumb__sep" aria-hidden="true">/</span>
+        </li>
+      {%- endif -%}
+      <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
+        <span class="breadcrumb__current">{{ product.title }}</span>
+      </li>
+
+    {%- elsif template.name == 'article' -%}
+      <li class="breadcrumb__item">
+        <a href="{{ blog.url }}" class="breadcrumb__link">{{ blog.title }}</a>
+        <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      </li>
+      <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
+        <span class="breadcrumb__current">{{ article.title }}</span>
+      </li>
+
+    {%- elsif template.name == 'page' -%}
+      <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
+        <span class="breadcrumb__current">{{ page.title }}</span>
+      </li>
+
+    {%- elsif template.name == 'blog' -%}
+      <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
+        <span class="breadcrumb__current">{{ blog.title }}</span>
+      </li>
+
+    {%- elsif template.name == 'list-collections' -%}
+      <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
+        <span class="breadcrumb__current">{{ 'general.breadcrumb.collections' | t }}</span>
+      </li>
+    {%- endif -%}
+  </ol>
+</nav>
+
+{% stylesheet %}
+  .breadcrumb__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-gray-500);
+  }
+
+  .breadcrumb__item {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .breadcrumb__link {
+    color: var(--color-gray-500);
+    transition: color var(--transition-fast);
+  }
+
+  .breadcrumb__link:hover {
+    color: var(--color-black);
+  }
+
+  .breadcrumb__sep {
+    margin: 0 10px;
+    color: var(--color-gray-300);
+  }
+
+  .breadcrumb__current {
+    color: var(--color-black);
+  }
+{% endstylesheet %}

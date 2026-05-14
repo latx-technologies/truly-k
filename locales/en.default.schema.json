@@ -96,7 +96,57 @@
     "slide": "Slide",
     "category": "Category",
     "trust_badge": "Trust Badge",
-    "banner": "Banner"
+    "banner": "Banner",
+    "main_account": "Account dashboard",
+    "main_login": "Login",
+    "main_register": "Register",
+    "main_addresses": "Addresses",
+    "main_order": "Order",
+    "main_reset_password": "Reset password",
+    "main_activate_account": "Activate account",
+    "collection_hero": "Collection hero",
+    "main_collection": "Collection products",
+    "main_cart": "Cart"
+  },
+  "cart_settings": {
+    "enable_note": "Enable order note",
+    "trust_badge": "Trust badge",
+    "trust_icon": "Icon",
+    "icon_shipping": "Shipping",
+    "icon_returns": "Returns",
+    "icon_secure": "Secure checkout",
+    "icon_support": "Customer support",
+    "icon_check": "Check mark"
+  },
+  "collection_hero": {
+    "show_breadcrumb": "Show breadcrumb",
+    "eyebrow": "Eyebrow",
+    "description_override": "Description override",
+    "description_override_info": "Leave empty to use the collection's own description from Shopify admin.",
+    "show_product_count": "Show product count",
+    "banner_header": "Banner image",
+    "banner_info": "Add an image to switch the hero into banner mode. Leave empty for a minimal text-only hero.",
+    "use_collection_image": "Use collection's image",
+    "use_collection_image_info": "Falls back to the image below when no collection image is set.",
+    "banner_image": "Banner image",
+    "banner_image_info": "Used when 'Use collection's image' is off, or as fallback.",
+    "overlay_opacity": "Image overlay opacity",
+    "min_height": "Minimum height",
+    "min_height_info": "Set to 0 to let the hero size to its content only."
+  },
+  "collection_grid": {
+    "products_per_page": "Products per page",
+    "enable_sorting": "Show sort dropdown",
+    "show_vendor": "Show vendor instead of product type"
+  },
+  "account_settings": {
+    "intro_text": "Intro text",
+    "order_limit": "Orders per page",
+    "side_image_header": "Side image",
+    "side_image": "Image",
+    "side_image_position": "Image position",
+    "guest_header": "Guest checkout",
+    "show_guest_login": "Show 'continue as guest' button on order-status page"
   },
   "header_settings": {
     "logo": "Logo",
@@ -144,6 +194,25 @@
     "legal": "Legal",
     "terms_url": "Terms of Service URL",
     "privacy_url": "Privacy Policy URL"
+  },
+  "collections_settings": {
+    "card_style": "Card style",
+    "card_style_below": "Title below image",
+    "card_style_overlay": "Title overlaid on image",
+    "image_aspect": "Image aspect ratio",
+    "aspect_square": "Square (1:1)",
+    "aspect_portrait": "Portrait (3:4)",
+    "aspect_landscape": "Landscape (4:3)",
+    "aspect_wide": "Wide (16:9)",
+    "columns_desktop": "Columns on desktop",
+    "columns_mobile": "Columns on mobile",
+    "show_product_count": "Show product count",
+    "show_description": "Show description",
+    "view_label": "'View' link text",
+    "view_label_info": "Leave empty to hide the link under each card.",
+    "hide_empty": "Hide empty collections",
+    "hide_all_handle": "Hide the 'All' collection",
+    "hide_all_handle_info": "Excludes the auto-generated collection with handle 'all'."
   },
   "carousel_settings": {
     "auto_rotate": "Auto-rotate slides",

@@ -1,0 +1,240 @@
+{% doc %}
+  Renders a single collection as a clickable card.
+
+  Supports two visual styles:
+  - "below": image on top, title and meta below (default)
+  - "overlay": full-bleed image with title overlaid
+
+  @param {collection} collection - The collection to render
+  @param {string} [style] - Card style: "below" or "overlay". Defaults to "below".
+  @param {string} [aspect] - Image aspect ratio class: "card-aspect--square", "card-aspect--portrait", "card-aspect--landscape", "card-aspect--wide". Defaults to portrait.
+  @param {boolean} [show_count] - Show product count meta. Defaults to false.
+  @param {boolean} [show_description] - Show truncated description. Defaults to false.
+  @param {string} [view_label] - Optional label for the "view" link/CTA.
+  @param {string} [loading] - Image loading strategy: "eager" or "lazy". Defaults to "lazy".
+
+  @example
+  {% render 'collection-card', collection: col %}
+  {% render 'collection-card',
+    collection: col,
+    style: 'overlay',
+    aspect: 'card-aspect--landscape',
+    show_count: true,
+    loading: 'eager'
+  %}
+{% enddoc %}
+
+{%- liquid
+  assign card_style = style | default: 'below'
+  assign card_aspect = aspect | default: 'card-aspect--portrait'
+  assign card_loading = loading | default: 'lazy'
+
+  assign card_image = collection.image
+  if card_image == blank and collection.products.first
+    assign card_image = collection.products.first.featured_image
+  endif
+-%}
+
+<a
+  href="{{ collection.url }}"
+  class="collection-card collection-card--{{ card_style }}"
+  aria-label="{{ collection.title | escape }}"
+>
+  <div class="collection-card__media {{ card_aspect }}">
+    {%- if card_image -%}
+      {{ card_image | image_url: width: 800 | image_tag:
+        loading: card_loading,
+        widths: '320, 480, 640, 800, 1000',
+        sizes: '(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw',
+        class: 'collection-card__img',
+        alt: collection.title
+      }}
+    {%- else -%}
+      <div class="collection-card__placeholder">
+        {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    {%- endif -%}
+
+    {%- if card_style == 'overlay' -%}
+      <div class="collection-card__scrim" aria-hidden="true"></div>
+    {%- endif -%}
+
+    {%- if card_style == 'overlay' -%}
+      <div class="collection-card__content collection-card__content--on-image">
+        <h3 class="collection-card__title">{{ collection.title }}</h3>
+        {%- if show_count -%}
+          <span class="collection-card__count">
+            {{ 'collections_list.product_count' | t: count: collection.products_count }}
+          </span>
+        {%- endif -%}
+        {%- if view_label != blank -%}
+          <span class="collection-card__cta">
+            {{ view_label }}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if card_style != 'overlay' -%}
+    <div class="collection-card__content">
+      <h3 class="collection-card__title">{{ collection.title }}</h3>
+
+      {%- if show_count -%}
+        <span class="collection-card__count">
+          {{ 'collections_list.product_count' | t: count: collection.products_count }}
+        </span>
+      {%- endif -%}
+
+      {%- if show_description and collection.description != blank -%}
+        <p class="collection-card__description">
+          {{ collection.description | strip_html | truncatewords: 18 }}
+        </p>
+      {%- endif -%}
+
+      {%- if view_label != blank -%}
+        <span class="collection-card__cta link-arrow">
+          {{ view_label }}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </span>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</a>
+
+{% stylesheet %}
+  .collection-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+    transition: transform var(--transition-medium);
+  }
+
+  .collection-card__media {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--color-gray-100);
+  }
+
+  .card-aspect--square    { aspect-ratio: 1 / 1; }
+  .card-aspect--portrait  { aspect-ratio: 3 / 4; }
+  .card-aspect--landscape { aspect-ratio: 4 / 3; }
+  .card-aspect--wide      { aspect-ratio: 16 / 9; }
+
+  .collection-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--transition-smooth);
+  }
+
+  .collection-card:hover .collection-card__img {
+    transform: scale(1.04);
+  }
+
+  .collection-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .collection-card__placeholder svg {
+    width: 60%;
+    opacity: 0.18;
+  }
+
+  .collection-card__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 55%);
+    transition: background var(--transition-medium);
+  }
+
+  .collection-card--overlay:hover .collection-card__scrim {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.1) 60%);
+  }
+
+  .collection-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 16px;
+  }
+
+  .collection-card__content--on-image {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+    padding: 0;
+    color: var(--color-white);
+    gap: 8px;
+  }
+
+  .collection-card__title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    line-height: 1.25;
+    margin: 0;
+    color: inherit;
+    transition: color var(--transition-fast);
+  }
+
+  .collection-card--below:hover .collection-card__title {
+    color: var(--color-gray-600);
+  }
+
+  .collection-card__count {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-gray-500);
+  }
+
+  .collection-card__content--on-image .collection-card__count {
+    color: var(--color-gray-200);
+  }
+
+  .collection-card__description {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+    color: var(--color-gray-600);
+    margin: 0;
+  }
+
+  .collection-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 4px;
+  }
+
+  .collection-card__cta svg {
+    transition: transform var(--transition-fast);
+  }
+
+  .collection-card:hover .collection-card__cta svg {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 768px) {
+    .collection-card__title { font-size: var(--text-lg); }
+    .collection-card__content { padding-top: 12px; }
+    .collection-card__content--on-image { left: 16px; right: 16px; bottom: 16px; }
+  }
+{% endstylesheet %}

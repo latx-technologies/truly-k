@@ -1,0 +1,441 @@
+{% comment %}
+  Used by templates/customers/login.json to render the customer sign-in page.
+  Includes sign-in, password recovery, and optional guest checkout flows.
+{% endcomment %}
+
+<section
+  class="auth-page"
+  style="
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="container">
+    <div class="auth-page__grid">
+      {%- if section.settings.side_image != blank -%}
+        <aside class="auth-page__media auth-page__media--{{ section.settings.image_position }}">
+          {{ section.settings.side_image | image_url: width: 1200 | image_tag:
+            loading: 'lazy',
+            widths: '600, 900, 1200',
+            sizes: '(max-width: 900px) 100vw, 50vw',
+            class: 'auth-page__media-img',
+            alt: ''
+          }}
+        </aside>
+      {%- endif -%}
+
+      <div class="auth-page__content">
+
+        {%- comment -%} Recover password form {%- endcomment -%}
+        <div id="recover-password" class="auth-card auth-card--recover" hidden>
+          <header class="auth-card__header">
+            <span class="auth-card__eyebrow text-label">{{ 'customer.recover_password.eyebrow' | t }}</span>
+            <h1 class="auth-card__title heading-section">{{ 'customer.recover_password.title' | t }}</h1>
+            <p class="auth-card__subtitle text-muted">{{ 'customer.recover_password.subtitle' | t }}</p>
+          </header>
+
+          {%- form 'recover_customer_password' -%}
+            {%- if form.posted_successfully? -%}
+              <p class="form-success">{{ 'customer.recover_password.success_html' | t }}</p>
+            {%- endif -%}
+
+            {%- if form.errors -%}
+              <div class="form-error-list" role="alert">
+                {%- for field in form.errors -%}
+                  <p class="form-error">{{ form.errors.messages[field] }}</p>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            <div class="form-field">
+              <label class="form-field__label" for="recover-email">{{ 'customer.recover_password.email' | t }}</label>
+              <input
+                class="form-field__input"
+                type="email"
+                id="recover-email"
+                name="email"
+                autocomplete="email"
+                spellcheck="false"
+                autocapitalize="off"
+                required
+              >
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-card__submit">
+              <span>{{ 'customer.recover_password.submit' | t }}</span>
+            </button>
+
+            <button
+              type="button"
+              class="auth-card__toggle link-arrow"
+              data-toggle-target="recover-password"
+              data-toggle-show="login"
+            >
+              {{ 'customer.recover_password.cancel' | t }}
+            </button>
+          {%- endform -%}
+        </div>
+
+        {%- comment -%} Sign-in form {%- endcomment -%}
+        <div id="login" class="auth-card">
+          <header class="auth-card__header">
+            {%- if section.settings.subtitle != blank -%}
+              <span class="auth-card__eyebrow text-label">{{ section.settings.subtitle }}</span>
+            {%- endif -%}
+            <h1 class="auth-card__title heading-section">
+              {%- if section.settings.heading != blank -%}
+                {{ section.settings.heading }}
+              {%- else -%}
+                {{ 'customer.login.title' | t }}
+              {%- endif -%}
+            </h1>
+            {%- if section.settings.description != blank -%}
+              <p class="auth-card__subtitle text-muted">{{ section.settings.description }}</p>
+            {%- endif -%}
+          </header>
+
+          {%- form 'customer_login', novalidate: 'novalidate' -%}
+            {%- if form.errors -%}
+              <div class="form-error-list" role="alert">
+                {%- for field in form.errors -%}
+                  <p class="form-error">{{ form.errors.messages[field] }}</p>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            <div class="form-field">
+              <label class="form-field__label" for="login-email">{{ 'customer.login.email' | t }}</label>
+              <input
+                class="form-field__input"
+                type="email"
+                id="login-email"
+                name="customer[email]"
+                autocomplete="email"
+                spellcheck="false"
+                autocapitalize="off"
+                required
+              >
+            </div>
+
+            <div class="form-field">
+              <div class="form-field__row">
+                <label class="form-field__label" for="login-password">{{ 'customer.login.password' | t }}</label>
+                <button
+                  type="button"
+                  class="auth-card__inline-link"
+                  data-toggle-target="login"
+                  data-toggle-show="recover-password"
+                >
+                  {{ 'customer.login.forgot_password' | t }}
+                </button>
+              </div>
+              <input
+                class="form-field__input"
+                type="password"
+                id="login-password"
+                name="customer[password]"
+                autocomplete="current-password"
+                required
+              >
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-card__submit">
+              <span>{{ 'customer.login.submit' | t }}</span>
+            </button>
+
+            <p class="auth-card__alt">
+              {{ 'customer.login.no_account' | t }}
+              <a href="{{ routes.account_register_url }}" class="auth-card__alt-link">
+                {{ 'customer.login.create_account' | t }}
+              </a>
+            </p>
+          {%- endform -%}
+        </div>
+
+        {%- comment -%} Guest checkout (only on order-status pages with shop.checkout.guest_login) {%- endcomment -%}
+        {%- if shop.checkout.guest_login and section.settings.show_guest_login -%}
+          <div class="auth-card auth-card--guest">
+            <header class="auth-card__header">
+              <h2 class="auth-card__title heading-card">{{ 'customer.login.guest_title' | t }}</h2>
+            </header>
+            {%- form 'guest_login' -%}
+              <button type="submit" class="btn btn-secondary auth-card__submit">
+                <span>{{ 'customer.login.guest_continue' | t }}</span>
+              </button>
+            {%- endform -%}
+          </div>
+        {%- endif -%}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .auth-page {
+    padding: var(--section-padding-top, 64px) 0 var(--section-padding-bottom, 64px);
+  }
+
+  .auth-page__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    align-items: stretch;
+  }
+
+  .auth-page__grid:has(.auth-page__media) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .auth-page__media {
+    position: relative;
+    overflow: hidden;
+    min-height: 480px;
+    background: var(--color-gray-100);
+  }
+
+  .auth-page__media--left { order: -1; }
+
+  .auth-page__media-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .auth-page__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+    align-self: center;
+  }
+
+  .auth-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .auth-card[hidden] {
+    display: none;
+  }
+
+  .auth-card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .auth-card__eyebrow { margin: 0; }
+  .auth-card__title { margin: 0; }
+  .auth-card__subtitle { margin: 0; }
+
+  .auth-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-field__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .auth-card__inline-link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-gray-600);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color var(--transition-fast);
+  }
+
+  .auth-card__inline-link:hover { color: var(--color-black); }
+
+  .auth-card__submit {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .auth-card__toggle {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-black);
+  }
+
+  .auth-card__alt {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-gray-600);
+    margin: 0;
+    text-align: center;
+  }
+
+  .auth-card__alt-link {
+    font-weight: 600;
+    color: var(--color-black);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .auth-card--guest {
+    padding-top: 32px;
+    border-top: 1px solid var(--color-gray-200);
+  }
+
+  @media (max-width: 900px) {
+    .auth-page__grid,
+    .auth-page__grid:has(.auth-page__media) {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .auth-page__media {
+      min-height: 280px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .auth-page { padding: 48px 0; }
+    .auth-page__media { display: none; }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    // Reveal #recover-password if the URL hash points to it. Toggle visibility between the two cards.
+    var loginCard = document.getElementById('login');
+    var recoverCard = document.getElementById('recover-password');
+    if (!loginCard || !recoverCard) return;
+
+    function show(id) {
+      var target = document.getElementById(id);
+      var other = id === 'login' ? recoverCard : loginCard;
+      if (!target) return;
+      target.hidden = false;
+      other.hidden = true;
+      var firstInput = target.querySelector('input');
+      if (firstInput) firstInput.focus();
+    }
+
+    if (window.location.hash === '#recover-password') {
+      show('recover-password');
+    } else {
+      show('login');
+    }
+
+    document.querySelectorAll('[data-toggle-show]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        show(btn.dataset.toggleShow);
+        if (btn.dataset.toggleShow === 'recover-password') {
+          history.replaceState(null, '', '#recover-password');
+        } else {
+          history.replaceState(null, '', '#');
+        }
+      });
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "t:names.main_login",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:labels.heading"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "t:carousel_settings.subtitle",
+      "default": "Welcome back"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "t:carousel_settings.description",
+      "default": "Sign in to view orders, track shipments, and manage your details."
+    },
+    {
+      "type": "header",
+      "content": "t:account_settings.side_image_header"
+    },
+    {
+      "type": "image_picker",
+      "id": "side_image",
+      "label": "t:account_settings.side_image"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "t:account_settings.side_image_position",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "t:account_settings.guest_header"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_guest_login",
+      "label": "t:account_settings.show_guest_login",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:carousel_settings.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:carousel_settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:carousel_settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

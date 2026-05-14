@@ -1,83 +1,300 @@
 {% comment %}
-  This section is used in the list-collections template to render a list of
-  collections.
+  Used by the list-collections template to render every collection in the
+  store as a grid of cards. Merchants control layout, card style, and what
+  meta is shown via theme editor settings.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
 {% endcomment %}
 
-<h1>{{ 'collections.title' | t }}</h1>
+{%- liquid
+  assign hide_empty = section.settings.hide_empty
+  assign hide_all_handle = section.settings.hide_all_handle
+-%}
 
-<div
-  class="collections {{ section.settings.grid_item_width }}"
-  style="--grid-gap: {{ section.settings.grid_gap }}px"
+<section
+  class="collections-list"
+  style="
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --grid-gap: {{ section.settings.grid_gap }}px;
+    --columns-desktop: {{ section.settings.columns_desktop }};
+    --columns-mobile: {{ section.settings.columns_mobile }};
+  "
 >
-  {% for collection in collections %}
-    <a class="collection-card" href="{{ collection.url }}">
-      {% if collection.featured_image %}
-        {% render 'image',
-          class: 'collection-card__image',
-          image: collection.featured_image,
-          width: 600,
-          height: 600,
-          crop: 'center'
+  <div class="container">
+
+    {%- if section.settings.subtitle != blank or section.settings.title != blank or section.settings.description != blank -%}
+      <header class="collections-list__header">
+        {%- if section.settings.subtitle != blank -%}
+          <span class="collections-list__eyebrow text-label">
+            {{ section.settings.subtitle }}
+          </span>
+        {%- endif -%}
+
+        {%- if section.settings.title != blank -%}
+          <h1 class="collections-list__title heading-section-lg">
+            {{ section.settings.title }}
+          </h1>
+        {%- endif -%}
+
+        {%- if section.settings.description != blank -%}
+          <p class="collections-list__description text-lead">
+            {{ section.settings.description }}
+          </p>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    {%- assign rendered = 0 -%}
+    <div class="collections-list__grid">
+      {%- for collection in collections -%}
+        {%- if hide_all_handle and collection.handle == 'all' -%}{%- continue -%}{%- endif -%}
+        {%- if hide_empty and collection.products_count == 0 -%}{%- continue -%}{%- endif -%}
+
+        {%- assign card_loading = 'lazy' -%}
+        {%- if forloop.index0 < 4 -%}
+          {%- assign card_loading = 'eager' -%}
+        {%- endif -%}
+
+        {% render 'collection-card',
+          collection: collection,
+          style: section.settings.card_style,
+          aspect: section.settings.image_aspect,
+          show_count: section.settings.show_product_count,
+          show_description: section.settings.show_description,
+          view_label: section.settings.view_label,
+          loading: card_loading
         %}
-      {% endif %}
 
-      <div class="collection-card__content">
-        <p>{{ collection.title }}</p>
+        {%- assign rendered = rendered | plus: 1 -%}
+      {%- endfor -%}
+    </div>
 
-        {% if collection.description %}
-          <p>{{ collection.description | strip_html | truncatewords: 15 }}</p>
-        {% endif %}
-      </div>
-    </a>
-  {% endfor %}
-</div>
+    {%- if rendered == 0 -%}
+      <p class="collections-list__empty">
+        {{ 'collections_list.empty_state' | t }}
+      </p>
+    {%- endif -%}
+
+  </div>
+</section>
 
 {% stylesheet %}
-  .collections {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(var(--collection-card-size), 100%), 1fr));
-    gap: var(--grid-gap);
+  .collections-list {
+    padding: var(--section-padding-top, 64px) 0 var(--section-padding-bottom, 64px);
   }
-  .collections--compact {
-    --collection-card-size: 160px;
-  }
-  .collections--full {
-    --collection-card-size: 280px;
-  }
-  .collection-card {
+
+  .collections-list__header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 48px;
     display: flex;
     flex-direction: column;
-    width: 100%;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .collections-list__eyebrow {
+    margin: 0;
+  }
+
+  .collections-list__title {
+    margin: 0;
+  }
+
+  .collections-list__description {
+    margin: 4px 0 0;
+  }
+
+  .collections-list__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--columns-desktop, 4), minmax(0, 1fr));
+    gap: var(--grid-gap, 32px);
+  }
+
+  .collections-list__empty {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-gray-500);
+    text-align: center;
+    padding: 48px 0;
+  }
+
+  @media (max-width: 1200px) {
+    .collections-list__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 900px) {
+    .collections-list__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .collections-list {
+      padding: 48px 0;
+    }
+    .collections-list__header {
+      margin-bottom: 32px;
+    }
+    .collections-list__grid {
+      grid-template-columns: repeat(var(--columns-mobile, 2), minmax(0, 1fr));
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .collections-list__grid {
+      gap: 16px;
+    }
   }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "t:general.collections_grid",
+  "name": "t:general.collections",
   "settings": [
     {
+      "type": "header",
+      "content": "t:labels.heading"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "t:carousel_settings.subtitle",
+      "default": "Shop by category"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:labels.heading",
+      "default": "All collections"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "t:carousel_settings.description",
+      "default": "Browse every collection in the store, from skincare essentials to limited drops."
+    },
+    {
+      "type": "header",
+      "content": "t:general.layout"
+    },
+    {
       "type": "select",
-      "id": "grid_item_width",
-      "label": "t:labels.grid_item_width",
+      "id": "card_style",
+      "label": "t:collections_settings.card_style",
       "options": [
-        { "value": "collections--compact", "label": "t:options.size.small" },
-        { "value": "collections--full", "label": "t:options.size.large" }
+        { "value": "below", "label": "t:collections_settings.card_style_below" },
+        { "value": "overlay", "label": "t:collections_settings.card_style_overlay" }
       ],
-      "default": "collections--full"
+      "default": "below"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect",
+      "label": "t:collections_settings.image_aspect",
+      "options": [
+        { "value": "card-aspect--square", "label": "t:collections_settings.aspect_square" },
+        { "value": "card-aspect--portrait", "label": "t:collections_settings.aspect_portrait" },
+        { "value": "card-aspect--landscape", "label": "t:collections_settings.aspect_landscape" },
+        { "value": "card-aspect--wide", "label": "t:collections_settings.aspect_wide" }
+      ],
+      "default": "card-aspect--portrait"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "t:collections_settings.columns_desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "t:collections_settings.columns_mobile",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ],
+      "default": "2"
     },
     {
       "type": "range",
       "id": "grid_gap",
       "label": "t:labels.grid_gap",
-      "min": 0,
-      "max": 50,
-      "step": 5,
+      "min": 8,
+      "max": 64,
+      "step": 4,
       "unit": "px",
-      "default": 10
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "t:general.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_count",
+      "label": "t:collections_settings.show_product_count",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "t:collections_settings.show_description",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "view_label",
+      "label": "t:collections_settings.view_label",
+      "info": "t:collections_settings.view_label_info"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_empty",
+      "label": "t:collections_settings.hide_empty",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_all_handle",
+      "label": "t:collections_settings.hide_all_handle",
+      "info": "t:collections_settings.hide_all_handle_info",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:carousel_settings.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:carousel_settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:carousel_settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
     }
   ],
-  "presets": [{ "name": "t:general.collections_grid" }]
+  "presets": [
+    { "name": "t:general.collections" }
+  ]
 }
 {% endschema %}

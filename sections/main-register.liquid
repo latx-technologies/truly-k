@@ -1,0 +1,204 @@
+{% comment %}
+  Used by templates/customers/register.json to render the customer
+  registration form.
+{% endcomment %}
+
+<section
+  class="auth-page"
+  style="
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="container">
+    <div class="auth-page__grid">
+      {%- if section.settings.side_image != blank -%}
+        <aside class="auth-page__media auth-page__media--{{ section.settings.image_position }}">
+          {{ section.settings.side_image | image_url: width: 1200 | image_tag:
+            loading: 'lazy',
+            widths: '600, 900, 1200',
+            sizes: '(max-width: 900px) 100vw, 50vw',
+            class: 'auth-page__media-img',
+            alt: ''
+          }}
+        </aside>
+      {%- endif -%}
+
+      <div class="auth-page__content">
+        <div class="auth-card">
+          <header class="auth-card__header">
+            {%- if section.settings.subtitle != blank -%}
+              <span class="auth-card__eyebrow text-label">{{ section.settings.subtitle }}</span>
+            {%- endif -%}
+            <h1 class="auth-card__title heading-section">
+              {%- if section.settings.heading != blank -%}
+                {{ section.settings.heading }}
+              {%- else -%}
+                {{ 'customer.register.title' | t }}
+              {%- endif -%}
+            </h1>
+            {%- if section.settings.description != blank -%}
+              <p class="auth-card__subtitle text-muted">{{ section.settings.description }}</p>
+            {%- endif -%}
+          </header>
+
+          {%- form 'create_customer', novalidate: 'novalidate' -%}
+            {%- if form.errors -%}
+              <div class="form-error-list" role="alert">
+                {%- for field in form.errors -%}
+                  <p class="form-error">{{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}</p>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            <div class="auth-card__row">
+              <div class="form-field">
+                <label class="form-field__label" for="register-first-name">{{ 'customer.register.first_name' | t }}</label>
+                <input
+                  class="form-field__input"
+                  type="text"
+                  id="register-first-name"
+                  name="customer[first_name]"
+                  autocomplete="given-name"
+                >
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="register-last-name">{{ 'customer.register.last_name' | t }}</label>
+                <input
+                  class="form-field__input"
+                  type="text"
+                  id="register-last-name"
+                  name="customer[last_name]"
+                  autocomplete="family-name"
+                >
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="register-email">{{ 'customer.register.email' | t }}</label>
+              <input
+                class="form-field__input"
+                type="email"
+                id="register-email"
+                name="customer[email]"
+                autocomplete="email"
+                spellcheck="false"
+                autocapitalize="off"
+                required
+              >
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="register-password">{{ 'customer.register.password' | t }}</label>
+              <input
+                class="form-field__input"
+                type="password"
+                id="register-password"
+                name="customer[password]"
+                autocomplete="new-password"
+                required
+              >
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-card__submit">
+              <span>{{ 'customer.register.submit' | t }}</span>
+            </button>
+
+            <p class="auth-card__alt">
+              {{ 'customer.register.have_account' | t }}
+              <a href="{{ routes.account_login_url }}" class="auth-card__alt-link">
+                {{ 'customer.register.sign_in' | t }}
+              </a>
+            </p>
+          {%- endform -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .auth-card__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 540px) {
+    .auth-card__row {
+      grid-template-columns: 1fr;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.main_register",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:labels.heading"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "t:carousel_settings.subtitle",
+      "default": "Join the community"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "t:carousel_settings.description",
+      "default": "Save your details, track orders, and unlock member rewards."
+    },
+    {
+      "type": "header",
+      "content": "t:account_settings.side_image_header"
+    },
+    {
+      "type": "image_picker",
+      "id": "side_image",
+      "label": "t:account_settings.side_image"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "t:account_settings.side_image_position",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "header",
+      "content": "t:carousel_settings.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:carousel_settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:carousel_settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

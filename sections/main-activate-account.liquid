@@ -1,0 +1,103 @@
+{% comment %}
+  Used by templates/customers/activate_account.json. Renders the form for new
+  customers to set their password and activate the account they were invited to.
+{% endcomment %}
+
+<section
+  class="auth-page"
+  style="
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="container">
+    <div class="auth-page__content auth-page__content--narrow">
+      <div class="auth-card">
+        <header class="auth-card__header">
+          <span class="auth-card__eyebrow text-label">{{ 'customer.activate_account.eyebrow' | t }}</span>
+          <h1 class="auth-card__title heading-section">{{ 'customer.activate_account.title' | t }}</h1>
+          <p class="auth-card__subtitle text-muted">{{ 'customer.activate_account.subtitle' | t }}</p>
+        </header>
+
+        {%- form 'activate_customer_password', novalidate: 'novalidate' -%}
+          {%- if form.errors -%}
+            <div class="form-error-list" role="alert">
+              {%- for field in form.errors -%}
+                <p class="form-error">{{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}</p>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+
+          <div class="form-field">
+            <label class="form-field__label" for="activate-password">{{ 'customer.activate_account.password' | t }}</label>
+            <input
+              class="form-field__input"
+              type="password"
+              id="activate-password"
+              name="customer[password]"
+              autocomplete="new-password"
+              required
+            >
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label" for="activate-password-confirmation">{{ 'customer.activate_account.password_confirm' | t }}</label>
+            <input
+              class="form-field__input"
+              type="password"
+              id="activate-password-confirmation"
+              name="customer[password_confirmation]"
+              autocomplete="new-password"
+              required
+            >
+          </div>
+
+          <div class="auth-card__actions">
+            <button type="submit" class="btn btn-primary auth-card__submit">
+              <span>{{ 'customer.activate_account.submit' | t }}</span>
+            </button>
+            <button type="submit" name="decline" class="btn btn-secondary auth-card__submit">
+              <span>{{ 'customer.activate_account.decline' | t }}</span>
+            </button>
+          </div>
+        {%- endform -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .auth-card__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.main_activate_account",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:carousel_settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:carousel_settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    }
+  ]
+}
+{% endschema %}

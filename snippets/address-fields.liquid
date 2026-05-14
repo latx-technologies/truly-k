@@ -1,0 +1,221 @@
+{% doc %}
+  Renders the customer address form fields (first/last name, company, address1,
+  address2, city, country, province, zip, phone). Field IDs are namespaced with
+  @param `prefix` so the snippet can be rendered multiple times in one page.
+
+  @param {object} form - The form object from {% form 'customer_address' %}
+  @param {string} prefix - A unique prefix for field IDs (e.g. 'new', 123). Required.
+
+  @example
+  {% form 'customer_address', customer.new_address %}
+    {% render 'address-fields', form: form, prefix: 'new' %}
+  {% endform %}
+{% enddoc %}
+
+{%- liquid
+  assign id_prefix = prefix | default: 'addr'
+  assign country_default = form.country
+  if country_default == blank
+    assign country_default = shop.address.country
+  endif
+-%}
+
+<div class="address-form__grid">
+  <div class="form-field">
+    <label class="form-field__label" for="address-{{ id_prefix }}-first-name">
+      {{ 'customer.account.addresses.first_name' | t }}
+    </label>
+    <input
+      class="form-field__input"
+      type="text"
+      id="address-{{ id_prefix }}-first-name"
+      name="address[first_name]"
+      value="{{ form.first_name }}"
+      autocomplete="given-name"
+    >
+  </div>
+
+  <div class="form-field">
+    <label class="form-field__label" for="address-{{ id_prefix }}-last-name">
+      {{ 'customer.account.addresses.last_name' | t }}
+    </label>
+    <input
+      class="form-field__input"
+      type="text"
+      id="address-{{ id_prefix }}-last-name"
+      name="address[last_name]"
+      value="{{ form.last_name }}"
+      autocomplete="family-name"
+    >
+  </div>
+</div>
+
+<div class="address-form__grid address-form__grid--full">
+  <div class="form-field">
+    <label class="form-field__label" for="address-{{ id_prefix }}-company">
+      {{ 'customer.account.addresses.company' | t }}
+    </label>
+    <input
+      class="form-field__input"
+      type="text"
+      id="address-{{ id_prefix }}-company"
+      name="address[company]"
+      value="{{ form.company }}"
+      autocomplete="organization"
+    >
+  </div>
+
+  <div class="form-field">
+    <label class="form-field__label" for="address-{{ id_prefix }}-address1">
+      {{ 'customer.account.addresses.address1' | t }}
+    </label>
+    <input
+      class="form-field__input"
+      type="text"
+      id="address-{{ id_prefix }}-address1"
+      name="address[address1]"
+      value="{{ form.address1 }}"
+      autocomplete="address-line1"
+      required
+    >
+  </div>
+
+  <div class="form-field">
+    <label class="form-field__label" for="address-{{ id_prefix }}-address2">
+      {{ 'customer.account.addresses.address2' | t }}
+    </label>
+    <input
+      class="form-field__input"
+      type="text"
+      id="address-{{ id_prefix }}-address2"
+      name="address[address2]"
+      value="{{ form.address2 }}"
+      autocomplete="address-line2"
+    >
+  </div>
+</div>
+
+<div class="address-form__grid">
+  <div class="form-field">
+    <label class="form-field__label" for="address-{{ id_prefix }}-city">
+      {{ 'customer.account.addresses.city' | t }}
+    </label>
+    <input
+      class="form-field__input"
+      type="text"
+      id="address-{{ id_prefix }}-city"
+      name="address[city]"
+      value="{{ form.city }}"
+      autocomplete="address-level2"
+      required
+    >
+  </div>
+
+  <div class="form-field">
+    <label class="form-field__label" for="address-{{ id_prefix }}-zip">
+      {{ 'customer.account.addresses.zip' | t }}
+    </label>
+    <input
+      class="form-field__input"
+      type="text"
+      id="address-{{ id_prefix }}-zip"
+      name="address[zip]"
+      value="{{ form.zip }}"
+      autocomplete="postal-code"
+      required
+    >
+  </div>
+</div>
+
+<div class="address-form__grid">
+  <div class="form-field">
+    <label class="form-field__label" for="address-{{ id_prefix }}-country">
+      {{ 'customer.account.addresses.country' | t }}
+    </label>
+    <select
+      class="form-field__select"
+      id="address-{{ id_prefix }}-country"
+      name="address[country]"
+      data-default="{{ country_default }}"
+      data-province-target="address-{{ id_prefix }}-province"
+      autocomplete="country"
+      required
+    >
+      {{ all_country_option_tags }}
+    </select>
+  </div>
+
+  <div class="form-field" data-province-container="address-{{ id_prefix }}-province">
+    <label class="form-field__label" for="address-{{ id_prefix }}-province">
+      {{ 'customer.account.addresses.province' | t }}
+    </label>
+    <select
+      class="form-field__select"
+      id="address-{{ id_prefix }}-province"
+      name="address[province]"
+      data-default="{{ form.province }}"
+      autocomplete="address-level1"
+    ></select>
+  </div>
+</div>
+
+<div class="address-form__grid address-form__grid--full">
+  <div class="form-field">
+    <label class="form-field__label" for="address-{{ id_prefix }}-phone">
+      {{ 'customer.account.addresses.phone' | t }}
+    </label>
+    <input
+      class="form-field__input"
+      type="tel"
+      id="address-{{ id_prefix }}-phone"
+      name="address[phone]"
+      value="{{ form.phone }}"
+      autocomplete="tel"
+    >
+  </div>
+</div>
+
+{% javascript %}
+  (function () {
+    function syncProvinces(select) {
+      var targetId = select.dataset.provinceTarget;
+      var target = document.getElementById(targetId);
+      if (!target) return;
+      var container = target.closest('[data-province-container]');
+      var option = select.options[select.selectedIndex];
+      var raw = option ? option.getAttribute('data-provinces') : '[]';
+      var provinces = [];
+      try { provinces = JSON.parse(raw || '[]'); } catch (e) { provinces = []; }
+
+      target.innerHTML = '';
+      if (!provinces.length) {
+        if (container) container.style.display = 'none';
+        return;
+      }
+      if (container) container.style.display = '';
+
+      var defaultProvince = target.dataset.default || '';
+      provinces.forEach(function (p) {
+        var opt = document.createElement('option');
+        opt.value = p[0];
+        opt.textContent = p[1];
+        if (p[0] === defaultProvince) opt.selected = true;
+        target.appendChild(opt);
+      });
+    }
+
+    document.querySelectorAll('select[data-province-target]').forEach(function (select) {
+      var def = select.dataset.default;
+      if (def) {
+        for (var i = 0; i < select.options.length; i++) {
+          if (select.options[i].value === def) {
+            select.selectedIndex = i;
+            break;
+          }
+        }
+      }
+      syncProvinces(select);
+      select.addEventListener('change', function () { syncProvinces(select); });
+    });
+  })();
+{% endjavascript %}

@@ -1,0 +1,354 @@
+{% comment %}
+  Used by templates/customers/order.json to render the detail view of a single
+  customer order: line items, fulfillment timeline, totals, and addresses.
+{% endcomment %}
+
+<section
+  class="account-dashboard"
+  style="
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="container">
+    <nav class="order-detail__breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.account_url }}" class="link-arrow order-detail__back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        {{ 'customer.order.back' | t }}
+      </a>
+    </nav>
+
+    {%- assign placed_date = order.created_at | date: format: 'date' -%}
+    {%- assign cancelled_date = order.cancelled_at | date: format: 'date' -%}
+
+    <header class="account-dashboard__header">
+      <div class="account-dashboard__greeting">
+        <span class="account-dashboard__eyebrow text-label">{{ 'customer.order.eyebrow' | t }}</span>
+        <h1 class="account-dashboard__title heading-section-lg">
+          {{ 'customer.order.title' | t: name: order.name }}
+        </h1>
+        <p class="account-dashboard__intro text-muted">
+          {{ 'customer.order.date_html' | t: date: placed_date }}
+        </p>
+
+        {%- if order.cancelled -%}
+          <div class="form-error-list" role="status">
+            <p class="form-error">
+              {{ 'customer.order.cancelled_html' | t: date: cancelled_date }}
+            </p>
+            {%- if order.cancel_reason_label != blank -%}
+              <p class="form-error">{{ 'customer.order.cancelled_reason' | t: reason: order.cancel_reason_label }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </header>
+
+    <div class="order-detail__layout">
+      <div class="order-detail__main">
+
+        <section class="account-panel">
+          <header class="account-panel__header">
+            <h2 class="account-panel__title heading-card">{{ 'customer.order.line_items' | t }}</h2>
+            <div class="order-detail__status-group">
+              <span class="account-status account-status--{{ order.financial_status }}">
+                {{ order.financial_status_label }}
+              </span>
+              <span class="account-status account-status--{{ order.fulfillment_status | default: 'unfulfilled' }}">
+                {{ order.fulfillment_status_label }}
+              </span>
+            </div>
+          </header>
+
+          <div class="account-panel__table-wrap">
+            <table class="account-table order-items">
+              <thead>
+                <tr>
+                  <th scope="col">{{ 'customer.order.product' | t }}</th>
+                  <th scope="col" class="order-items__num">{{ 'customer.order.price' | t }}</th>
+                  <th scope="col" class="order-items__num">{{ 'customer.order.quantity' | t }}</th>
+                  <th scope="col" class="account-table__total">{{ 'customer.order.total' | t }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%- for line_item in order.line_items -%}
+                  <tr>
+                    <th scope="row">
+                      <div class="order-items__product">
+                        {%- if line_item.image -%}
+                          {{ line_item.image | image_url: width: 160 | image_tag:
+                            loading: 'lazy',
+                            widths: '80, 120, 160',
+                            class: 'order-items__img',
+                            alt: line_item.product.title
+                          }}
+                        {%- else -%}
+                          <div class="order-items__img order-items__img--placeholder">
+                            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                          </div>
+                        {%- endif -%}
+                        <div class="order-items__info">
+                          {%- if line_item.url -%}
+                            <a href="{{ line_item.url }}" class="order-items__title">{{ line_item.title }}</a>
+                          {%- else -%}
+                            <span class="order-items__title">{{ line_item.title }}</span>
+                          {%- endif -%}
+                          {%- if line_item.sku != blank -%}
+                            <span class="order-items__meta">{{ 'customer.order.sku' | t }}: {{ line_item.sku }}</span>
+                          {%- endif -%}
+                          {%- if line_item.fulfillment -%}
+                            {%- assign fulfilled_date = line_item.fulfillment.created_at | date: format: 'date' -%}
+                            <span class="order-items__meta">
+                              {{ 'customer.order.fulfilled_on' | t: date: fulfilled_date }}
+                              {%- if line_item.fulfillment.tracking_url -%}
+                                · <a href="{{ line_item.fulfillment.tracking_url }}" class="order-items__track">{{ 'customer.order.track' | t }}</a>
+                              {%- endif -%}
+                            </span>
+                          {%- endif -%}
+                        </div>
+                      </div>
+                    </th>
+                    <td class="order-items__num">{{ line_item.price | money }}</td>
+                    <td class="order-items__num">{{ line_item.quantity }}</td>
+                    <td class="account-table__total">{{ line_item.final_line_price | money }}</td>
+                  </tr>
+                {%- endfor -%}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row" colspan="3">{{ 'customer.order.subtotal' | t }}</th>
+                  <td class="account-table__total">{{ order.line_items_subtotal_price | money }}</td>
+                </tr>
+                {%- for discount_application in order.cart_level_discount_applications -%}
+                  <tr>
+                    <th scope="row" colspan="3">
+                      {{ 'customer.order.discount' | t }}
+                      <span class="order-totals__code">{{ discount_application.title }}</span>
+                    </th>
+                    <td class="account-table__total">-{{ discount_application.total_allocated_amount | money }}</td>
+                  </tr>
+                {%- endfor -%}
+                {%- for shipping_method in order.shipping_methods -%}
+                  <tr>
+                    <th scope="row" colspan="3">
+                      {{ 'customer.order.shipping' | t }}
+                      <span class="order-totals__code">{{ shipping_method.title }}</span>
+                    </th>
+                    <td class="account-table__total">{{ shipping_method.price | money }}</td>
+                  </tr>
+                {%- endfor -%}
+                {%- for tax_line in order.tax_lines -%}
+                  <tr>
+                    <th scope="row" colspan="3">
+                      {{ 'customer.order.tax' | t }}
+                      <span class="order-totals__code">{{ tax_line.title }} ({{ tax_line.rate | times: 100 }}%)</span>
+                    </th>
+                    <td class="account-table__total">{{ tax_line.price | money }}</td>
+                  </tr>
+                {%- endfor -%}
+                <tr class="order-totals__grand">
+                  <th scope="row" colspan="3">{{ 'customer.order.total' | t }}</th>
+                  <td class="account-table__total">{{ order.total_price | money }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+
+      </div>
+
+      <aside class="order-detail__sidebar">
+        {%- if order.shipping_address -%}
+          <section class="account-panel">
+            <h2 class="account-panel__title heading-card">{{ 'customer.order.shipping_address' | t }}</h2>
+            <address class="account-address-card__body">
+              {{ order.shipping_address | format_address }}
+            </address>
+          </section>
+        {%- endif -%}
+
+        {%- if order.billing_address -%}
+          <section class="account-panel">
+            <h2 class="account-panel__title heading-card">{{ 'customer.order.billing_address' | t }}</h2>
+            <address class="account-address-card__body">
+              {{ order.billing_address | format_address }}
+            </address>
+          </section>
+        {%- endif -%}
+      </aside>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .order-detail__breadcrumb {
+    margin-bottom: 24px;
+  }
+
+  .order-detail__back svg {
+    transition: transform var(--transition-fast);
+  }
+
+  .order-detail__back:hover svg {
+    transform: translateX(-4px);
+  }
+
+  .order-detail__layout {
+    display: grid;
+    grid-template-columns: 1fr minmax(280px, 360px);
+    gap: 32px;
+    align-items: start;
+  }
+
+  .order-detail__main { min-width: 0; }
+
+  .order-detail__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 32px;
+  }
+
+  .order-detail__status-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .order-items__product {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    text-align: left;
+    font-weight: 400;
+  }
+
+  .order-items__img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    background: var(--color-gray-100);
+    flex-shrink: 0;
+  }
+
+  .order-items__img--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .order-items__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .order-items__title {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--color-black);
+    line-height: 1.3;
+  }
+
+  a.order-items__title {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  .order-items__meta {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-gray-500);
+    letter-spacing: 0.04em;
+  }
+
+  .order-items__track {
+    color: var(--color-black);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .order-items__num {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .order-items tfoot th {
+    text-align: right;
+    color: var(--color-gray-600);
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: var(--text-sm);
+    border-bottom: 1px solid var(--color-gray-200);
+  }
+
+  .order-items tfoot tr:last-child th,
+  .order-items tfoot tr:last-child td {
+    padding-top: 16px;
+    font-size: var(--text-lg);
+    color: var(--color-black);
+    font-weight: 600;
+    border-bottom: none;
+    border-top: 1.5px solid var(--color-black);
+  }
+
+  .order-totals__code {
+    display: inline-block;
+    margin-left: 8px;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 400;
+    color: var(--color-gray-500);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  @media (max-width: 900px) {
+    .order-detail__layout {
+      grid-template-columns: 1fr;
+    }
+    .order-detail__sidebar {
+      position: static;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .order-items__img {
+      width: 56px;
+      height: 56px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.main_order",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:carousel_settings.padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:carousel_settings.padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

@@ -23,10 +23,33 @@
     "comment_form_title": "Add a comment"
   },
   "cart": {
-    "checkout": "Checkout",
-    "title": "Cart",
+    "title": "Your cart",
+    "summary_title": "Order summary",
+    "summary_label": "Order summary",
+    "checkout": "Proceed to checkout",
     "update": "Update",
-    "remove": "Remove"
+    "remove": "Remove",
+    "remove_aria": "Remove {{ title }}",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total": "Total",
+    "shipping_tax_note": "Shipping & taxes calculated at checkout.",
+    "continue_shopping": "Continue shopping",
+    "note_label": "Add order note",
+    "note_placeholder": "Special instructions, gift message, etc.",
+    "qty_label": "Quantity for {{ title }}",
+    "qty_decrease": "Decrease quantity",
+    "qty_increase": "Increase quantity",
+    "confirm_remove": "Remove this item from your cart?",
+    "headers": {
+      "product": "Product",
+      "quantity": "Quantity",
+      "total": "Total"
+    },
+    "items_word": "items",
+    "empty_title": "Your cart is empty",
+    "empty_body": "Looks like you haven't added anything yet. Explore the catalog to find something you'll love.",
+    "empty_cta": "Shop all products"
   },
   "customers": {
     "login": {
@@ -36,8 +59,158 @@
       "title": "Login"
     }
   },
+  "customer": {
+    "account": {
+      "title": "My account",
+      "eyebrow": "Account",
+      "welcome": "Welcome back",
+      "welcome_named": "Welcome back, {{ name }}",
+      "logout": "Sign out",
+      "nav_overview": "Overview",
+      "nav_addresses": "Addresses",
+      "no_orders": "You haven't placed any orders yet.",
+      "addresses_title": "Saved addresses",
+      "orders": {
+        "title": "Recent orders",
+        "view_all": "View all orders",
+        "order_number": "Order",
+        "order_date": "Date",
+        "payment_status": "Payment",
+        "fulfillment_status": "Fulfillment",
+        "total": "Total"
+      },
+      "address": {
+        "title": "Default address",
+        "default_badge": "Default",
+        "manage": "Manage addresses",
+        "empty": "You haven't saved an address yet."
+      },
+      "addresses": {
+        "list_title": "Address book",
+        "add_new": "Add new address",
+        "new_title": "New address",
+        "edit_title": "Edit address",
+        "default": "Default",
+        "empty": "You haven't saved any addresses yet.",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save address",
+        "cancel": "Cancel",
+        "set_default": "Set as default address",
+        "confirm_delete": "Are you sure you want to delete this address?",
+        "first_name": "First name",
+        "last_name": "Last name",
+        "company": "Company",
+        "address1": "Address",
+        "address2": "Apartment, suite, etc.",
+        "city": "City",
+        "country": "Country",
+        "province": "State / Province",
+        "zip": "ZIP / Postal code",
+        "phone": "Phone"
+      }
+    },
+    "login": {
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "forgot_password": "Forgot password?",
+      "submit": "Sign in",
+      "no_account": "New to TRULY K?",
+      "create_account": "Create account",
+      "guest_title": "Continue as guest",
+      "guest_continue": "Continue to checkout"
+    },
+    "register": {
+      "title": "Create account",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create account",
+      "have_account": "Already a member?",
+      "sign_in": "Sign in"
+    },
+    "recover_password": {
+      "eyebrow": "Forgot password",
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a link to reset your password.",
+      "email": "Email",
+      "submit": "Send reset link",
+      "cancel": "Back to sign in",
+      "success_html": "We've sent you an email with a link to update your password."
+    },
+    "reset_password": {
+      "eyebrow": "New password",
+      "title": "Set a new password",
+      "subtitle": "Enter a new password for your account.",
+      "password": "New password",
+      "password_confirm": "Confirm password",
+      "submit": "Reset password"
+    },
+    "activate_account": {
+      "eyebrow": "Welcome",
+      "title": "Activate your account",
+      "subtitle": "Create a password to finish setting up your account.",
+      "password": "Password",
+      "password_confirm": "Confirm password",
+      "submit": "Activate account",
+      "decline": "Decline invitation"
+    },
+    "order": {
+      "eyebrow": "Order details",
+      "title": "Order {{ name }}",
+      "date_html": "Placed on {{ date }}",
+      "cancelled_html": "Order cancelled on {{ date }}",
+      "cancelled_reason": "Reason: {{ reason }}",
+      "back": "Back to account",
+      "line_items": "Items",
+      "billing_address": "Billing address",
+      "shipping_address": "Shipping address",
+      "product": "Product",
+      "sku": "SKU",
+      "price": "Price",
+      "quantity": "Qty",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "tax": "Tax",
+      "track": "Track shipment",
+      "fulfilled_on": "Shipped on {{ date }}"
+    }
+  },
   "collections": {
     "title": "Collections"
+  },
+  "collections_list": {
+    "product_count": {
+      "one": "{{ count }} product",
+      "other": "{{ count }} products"
+    },
+    "empty_state": "No collections to show yet."
+  },
+  "general": {
+    "breadcrumb": {
+      "label": "Breadcrumb",
+      "home": "Home",
+      "collections": "Collections"
+    }
+  },
+  "collection_grid": {
+    "product_count": {
+      "one": "{{ count }} product",
+      "other": "{{ count }} products"
+    },
+    "sort_by": "Sort by",
+    "pagination_label": "Pagination",
+    "empty_title": "No products yet",
+    "empty_body": "This collection is empty for now. Check back soon or explore the full catalog.",
+    "shop_all": "Shop all products"
+  },
+  "product_card": {
+    "sold_out": "Sold out",
+    "from_price": "From {{ price }}"
   },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
