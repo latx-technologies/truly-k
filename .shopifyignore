@@ -11,3 +11,11 @@
 #
 # Ignore templates and sections with a regular expression:
 #   /(templates|sections)/.*\.json/
+
+# --- Merchant content & settings: never overwritten on push ---
+# These files store content edited in the Shopify theme editor.
+# Excluding them keeps `shopify theme push` from reverting live content
+# to the local copies.
+config/settings_data.json
+templates/*.json
+sections/*.json

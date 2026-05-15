@@ -1,108 +1,218 @@
 {% doc %}
-  Renders the PDP specifications accordion (Specifications, Ingredients,
-  Shipping & Returns).
+  Renders the PDP Specifications section.
 
-  Reads the following metafields with sensible fallbacks:
-    product.metafields.specs.long_description (richtext)
-    product.metafields.specs.skin_type        (single_line_text)
-    product.metafields.specs.ingredients      (multi_line_text/richtext)
-    product.metafields.specs.shipping         (richtext)
+  Content source (controlled by the "Content source" setting):
+    - "auto"   : uses the product's `custom.spec_sections` metaobject list when
+                 set, otherwise falls back to the editor-managed accordion blocks
+    - "blocks" : always uses the editor-managed accordion blocks
+
+  Per-product metafield overrides (each falls back to the block setting when
+  not set on the product):
+    custom.spec_enabled     (boolean)          - show/hide the section
+    custom.spec_heading     (single line text) - section heading
+    custom.spec_description (multi-line text)  - section description
 
   @example
   {% content_for 'block', type: 'pdp_specs', id: 'pdp-specs' %}
 {% enddoc %}
 
 {%- liquid
-  assign size_option = product.options_with_values | where: 'name', 'Size' | first
-  assign spec_desc = product.metafields.specs.long_description.value | default: product.description
-  assign spec_brand = product.vendor | default: 'MOOD'
-  assign spec_skin_type = product.metafields.specs.skin_type.value | default: 'All skin types'
-  assign spec_ingredients = product.metafields.specs.ingredients.value | default: block.settings.fallback_ingredients
-  assign spec_shipping = product.metafields.specs.shipping.value | default: block.settings.fallback_shipping
+  assign spec_sections = product.metafields.custom.spec_sections.value
+  assign use_metafield = false
+  if block.settings.content_source == 'auto' and spec_sections != blank
+    assign use_metafield = true
+  endif
+
+  assign section_enabled = block.settings.enable_section
+  if product.metafields.custom.spec_enabled
+    assign section_enabled = product.metafields.custom.spec_enabled.value
+  endif
+
+  assign section_heading = block.settings.heading
+  if product.metafields.custom.spec_heading.value != blank
+    assign section_heading = product.metafields.custom.spec_heading.value
+  endif
+
+  assign section_description = block.settings.description
+  if product.metafields.custom.spec_description.value != blank
+    assign section_description = product.metafields.custom.spec_description.value | newline_to_br
+  endif
 -%}
 
-{%- capture spec_size_value -%}
-  {%- if size_option -%}
-    {{ size_option.values | join: ', ' }}
-  {%- else -%}
-    {{ block.settings.fallback_size }}
-  {%- endif -%}
-{%- endcapture -%}
-
-<section class="pdp-specs-section" {{ block.shopify_attributes }}>
-  <div class="pdp__container">
-    <div class="pdp-specs">
-      <div class="pdp-specs__item is-open" data-accordion>
-        <button type="button" class="pdp-specs__head" data-accordion-trigger aria-expanded="true">
-          <span class="pdp-specs__title">{{ 'pdp.specs.title' | t }}</span>
-          <span class="pdp-specs__icon" aria-hidden="true"></span>
-        </button>
-        <div class="pdp-specs__body" data-accordion-body>
-          <p class="pdp-specs__text">{{ spec_desc | strip_html | truncatewords: 55 }}</p>
-          <table class="pdp-specs__table">
-            <tbody>
-              <tr><th scope="row">{{ 'pdp.specs.brand' | t }}</th><td>{{ spec_brand }}</td></tr>
-              <tr><th scope="row">{{ 'pdp.specs.skin_type' | t }}</th><td>{{ spec_skin_type }}</td></tr>
-              <tr><th scope="row">{{ 'pdp.specs.size' | t }}</th><td>{{ spec_size_value | strip }}</td></tr>
-            </tbody>
-          </table>
+{%- if section_enabled -%}
+  <section
+    class="pdp-specs-section"
+    style="
+      --header-align: {{ block.settings.alignment }};
+      --block-gap: {{ block.settings.content_spacing }}px;
+      --section-padding: {{ block.settings.section_padding }}px;
+    "
+    {{ block.shopify_attributes }}
+  >
+    <div class="pdp__container">
+      {%- if section_heading != blank or section_description != blank -%}
+        <div class="pdp-specs-section__header">
+          {%- if section_heading != blank -%}
+            <h2 class="pdp-specs-section__heading">{{ section_heading }}</h2>
+          {%- endif -%}
+          {%- if section_description != blank -%}
+            <div class="pdp-specs-section__description">{{ section_description }}</div>
+          {%- endif -%}
         </div>
-      </div>
+      {%- endif -%}
 
-      <div class="pdp-specs__item" data-accordion>
-        <button type="button" class="pdp-specs__head" data-accordion-trigger aria-expanded="false">
-          <span class="pdp-specs__title">{{ 'pdp.specs.ingredients' | t }}</span>
-          <span class="pdp-specs__icon" aria-hidden="true"></span>
-        </button>
-        <div class="pdp-specs__body" data-accordion-body>
-          <p class="pdp-specs__text">{{ spec_ingredients }}</p>
-        </div>
-      </div>
-
-      <div class="pdp-specs__item" data-accordion>
-        <button type="button" class="pdp-specs__head" data-accordion-trigger aria-expanded="false">
-          <span class="pdp-specs__title">{{ 'pdp.specs.shipping' | t }}</span>
-          <span class="pdp-specs__icon" aria-hidden="true"></span>
-        </button>
-        <div class="pdp-specs__body" data-accordion-body>
-          <p class="pdp-specs__text">{{ spec_shipping }}</p>
-        </div>
+      <div class="pdp-specs">
+        {%- if use_metafield -%}
+          {%- for sec in spec_sections -%}
+            <div
+              class="pdp-specs__item{% if sec.open_by_default.value %} is-open{% endif %}"
+              data-accordion
+            >
+              {% render 'pdp-specs-accordion-item',
+                heading: sec.heading.value,
+                content_type: sec.content_type.value,
+                text: sec.body.value | newline_to_br,
+                table_rows: sec.table_rows.value,
+                open: sec.open_by_default.value
+              %}
+            </div>
+          {%- endfor -%}
+        {%- else -%}
+          {% content_for 'blocks' %}
+        {%- endif -%}
       </div>
     </div>
-  </div>
-</section>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .pdp-specs-section {
+    padding-block: var(--section-padding, 0px);
+  }
+  .pdp-specs-section__header {
+    text-align: var(--header-align, left);
+    margin-bottom: var(--block-gap, 24px);
+  }
+  .pdp-specs-section__heading {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 500;
+    color: var(--color-black);
+    margin: 0 0 12px;
+  }
+  .pdp-specs-section__description {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--color-gray-600);
+  }
+  .pdp-specs-section__description > * {
+    margin: 0 0 8px;
+  }
+  .pdp-specs-section__description > *:last-child {
+    margin-bottom: 0;
+  }
+  .pdp-specs {
+    display: flex;
+    flex-direction: column;
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:pdp.specs.name",
+  "blocks": [{ "type": "pdp-specs-accordion" }],
   "settings": [
     {
-      "type": "header",
-      "content": "t:pdp.specs.fallback_header"
+      "type": "checkbox",
+      "id": "enable_section",
+      "label": "t:pdp.specs.enable_section_label",
+      "default": true
     },
     {
-      "type": "paragraph",
-      "content": "t:pdp.specs.fallback_info"
+      "type": "select",
+      "id": "content_source",
+      "label": "t:pdp.specs.content_source_label",
+      "info": "t:pdp.specs.content_source_info",
+      "default": "auto",
+      "options": [
+        { "value": "auto", "label": "t:pdp.specs.content_source_auto" },
+        { "value": "blocks", "label": "t:pdp.specs.content_source_blocks" }
+      ]
     },
     {
       "type": "text",
-      "id": "fallback_size",
-      "label": "t:pdp.specs.fallback_size_label",
-      "default": "30 ml, 50 ml, 100 ml"
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Product details"
     },
     {
-      "type": "textarea",
-      "id": "fallback_ingredients",
-      "label": "t:pdp.specs.fallback_ingredients_label",
-      "default": "Bakuchiol, Squalane, Rosehip Seed Oil, Jojoba Seed Oil, Evening Primrose Oil, Tocopherol (Vitamin E), Sea Buckthorn Extract, Calendula, Chamomile."
+      "type": "richtext",
+      "id": "description",
+      "label": "t:pdp.specs.description_label"
     },
     {
-      "type": "textarea",
-      "id": "fallback_shipping",
-      "label": "t:pdp.specs.fallback_shipping_label",
-      "default": "Complimentary standard shipping on orders over $75. Express and international options available at checkout. Returns accepted within 30 days of delivery — items must be unused and in original packaging."
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:labels.alignment",
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "t:pdp.specs.spacing_header"
+    },
+    {
+      "type": "range",
+      "id": "content_spacing",
+      "label": "t:pdp.specs.content_spacing_label",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "t:pdp.specs.section_padding_label",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 40
     }
   ],
-  "presets": [{ "name": "t:pdp.specs.name" }]
+  "presets": [
+    {
+      "name": "t:pdp.specs.name",
+      "blocks": [
+        {
+          "type": "pdp-specs-accordion",
+          "settings": {
+            "heading": "Specifications",
+            "open_by_default": true,
+            "content_type": "table",
+            "table_rows": "Brand | MOOD\nSkin type | All skin types\nSize | 30 ml"
+          }
+        },
+        {
+          "type": "pdp-specs-accordion",
+          "settings": {
+            "heading": "Ingredients",
+            "content_type": "text",
+            "text": "<p>Bakuchiol, Squalane, Rosehip Seed Oil, Jojoba Seed Oil, Evening Primrose Oil, Tocopherol (Vitamin E), Sea Buckthorn Extract, Calendula, Chamomile.</p>"
+          }
+        },
+        {
+          "type": "pdp-specs-accordion",
+          "settings": {
+            "heading": "Shipping & returns",
+            "content_type": "text",
+            "text": "<p>Complimentary standard shipping on orders over $75. Express and international options available at checkout. Returns accepted within 30 days of delivery.</p>"
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}

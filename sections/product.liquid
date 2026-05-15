@@ -247,10 +247,7 @@
               data-add-btn
               {% unless current_variant.available %}disabled{% endunless %}
             >
-              <span class="pdp__add-label" data-add-label>
                 {%- if current_variant.available -%}{{ 'pdp.info.add_to_bag' | t }}{%- else -%}{{ 'pdp.info.sold_out' | t }}{%- endif -%}
-              </span>
-              <span class="pdp__add-price" data-add-price>{{ current_variant.price | money }}</span>
             </button>
           </div>
 
@@ -742,7 +739,7 @@
 .pdp__add {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 16px;
   background-color: var(--color-black);
   color: var(--color-white);
@@ -789,7 +786,6 @@
 .pdp__wishlist.is-saved { color: var(--color-black); }
 .pdp__wishlist.is-saved svg { fill: var(--color-black); }
 
-.pdp-specs { margin-top: 80px; }
 .pdp-specs__item { border-top: 1px solid var(--color-border); }
 .pdp-specs__item:last-child { border-bottom: 1px solid var(--color-border); }
 .pdp-specs__head {

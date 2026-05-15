@@ -1,75 +1,269 @@
 {% doc %}
-  Renders the "Complete the Ritual" pairs-with grid.
+  Renders the "Complete the Ritual" cards block.
 
-  Reads from product.metafields.custom.pairs_with (list.product_reference).
-  Falls back to merchant-configurable demo cards.
+  Per-product metafield overrides (each falls back to the block setting):
+    custom.ritual_enabled        (boolean)          - show/hide section
+    custom.ritual_subtitle       (single line text) - eyebrow / subtitle
+    custom.ritual_heading        (single line text) - main heading
+    custom.ritual_description    (multi-line text)  - body copy
+    custom.ritual_show_view_all  (boolean)          - show the "View All" link
+    custom.ritual_view_all_link  (url)              - override "View All" url
+    custom.ritual_cards          (list.metaobject:ritual_card) - the cards
+
+  Each `ritual_card` metaobject exposes:
+    image          (file)
+    category       (single line text)
+    product_name   (single line text)
+    price          (single line text)
+    compare_price  (single line text)  - struck-through actual price (optional)
+    link           (url)               - card click destination (optional)
+
+  When more than 4 cards are present, the grid renders as a horizontal
+  carousel with prev/next buttons.
 
   @example
   {% content_for 'block', type: 'pdp_ritual', id: 'pdp-ritual' %}
 {% enddoc %}
 
-{%- assign pairs = product.metafields.custom.pairs_with.value -%}
+{%- liquid
+  assign cards = product.metafields.custom.ritual_cards.value
 
-<section class="pdp-ritual" {{ block.shopify_attributes }}>
-  <div class="pdp__container">
-    <div class="pdp-ritual__head">
-      <div>
-        <span class="pdp-ritual__eyebrow">{{ block.settings.eyebrow | default: 'Pairs With' }}</span>
-        <h2 class="pdp-ritual__heading">{{ block.settings.heading | default: 'Complete the ritual' }}</h2>
+  assign section_enabled = block.settings.enable_section
+  if product.metafields.custom.ritual_enabled
+    assign section_enabled = product.metafields.custom.ritual_enabled.value
+  endif
+
+  assign section_subtitle = block.settings.eyebrow
+  if product.metafields.custom.ritual_subtitle.value != blank
+    assign section_subtitle = product.metafields.custom.ritual_subtitle.value
+  endif
+
+  assign section_heading = block.settings.heading
+  if product.metafields.custom.ritual_heading.value != blank
+    assign section_heading = product.metafields.custom.ritual_heading.value
+  endif
+
+  assign section_description = block.settings.description
+  if product.metafields.custom.ritual_description.value != blank
+    assign section_description = product.metafields.custom.ritual_description.value | newline_to_br
+  endif
+
+  assign show_view_all = block.settings.show_view_all
+  if product.metafields.custom.ritual_show_view_all
+    assign show_view_all = product.metafields.custom.ritual_show_view_all.value
+  endif
+
+  assign view_all_link = block.settings.view_all_link | default: routes.all_products_collection_url
+  if product.metafields.custom.ritual_view_all_link.value != blank
+    assign view_all_link = product.metafields.custom.ritual_view_all_link.value
+  endif
+
+  assign cards_count = cards | size
+  assign is_carousel = false
+  if cards_count > 4
+    assign is_carousel = true
+  endif
+-%}
+
+{%- if section_enabled -%}
+  <section class="pdp-ritual" data-ritual-wrap {{ block.shopify_attributes }}>
+    <div class="pdp__container">
+      <div class="pdp-ritual__head">
+        <div class="pdp-ritual__head-text">
+          {%- if section_subtitle != blank -%}
+            <span class="pdp-ritual__eyebrow">{{ section_subtitle }}</span>
+          {%- endif -%}
+          {%- if section_heading != blank -%}
+            <h2 class="pdp-ritual__heading">{{ section_heading }}</h2>
+          {%- endif -%}
+          {%- if section_description != blank -%}
+            <div class="pdp-ritual__description">{{ section_description }}</div>
+          {%- endif -%}
+        </div>
+
+        <div class="pdp-ritual__head-actions">
+          {%- if show_view_all -%}
+            <a href="{{ view_all_link }}" class="pdp-ritual__view-all">
+              {{ block.settings.view_all_label | default: 'View All' }}
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+          {%- endif -%}
+          {%- if is_carousel -%}
+            <div class="pdp-ritual__nav">
+              <button type="button" class="pdp-ritual__nav-btn" data-ritual-prev aria-label="Previous">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button type="button" class="pdp-ritual__nav-btn" data-ritual-next aria-label="Next">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+          {%- endif -%}
+        </div>
       </div>
-      <a href="{{ block.settings.view_all_link | default: routes.all_products_collection_url }}" class="pdp-ritual__view-all">
-        {{ block.settings.view_all_label | default: 'View All' }}
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </a>
-    </div>
 
-    <div class="pdp-ritual__grid">
-      {%- if pairs != blank -%}
-        {%- for p in pairs limit: 4 -%}
-          <a class="pdp-ritual__card" href="{{ p.url }}">
-            <div class="pdp-ritual__img{% unless p.featured_image %} pdp-ritual__img--placeholder{% endunless %}">
-              {%- if p.featured_image -%}
-                {{ p.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: p.title }}
-              {%- endif -%}
-              <span class="pdp-ritual__tag">{{ p.type | upcase | default: 'PRODUCT' }}</span>
-            </div>
-            <div class="pdp-ritual__meta">
-              <span class="pdp-ritual__type">
-                {{ p.type | upcase | default: 'PRODUCT' }} · {{ forloop.index | prepend: '00' | slice: -3, 3 }}
-              </span>
-              <h3 class="pdp-ritual__name">{{ p.title }}</h3>
-              <span class="pdp-ritual__price">{{ p.price | money }}</span>
-            </div>
-          </a>
-        {%- endfor -%}
-      {%- else -%}
-        {%- assign pair_types  = block.settings.fallback_types  | split: '|' -%}
-        {%- assign pair_tags   = block.settings.fallback_tags   | split: '|' -%}
-        {%- assign pair_names  = block.settings.fallback_names  | split: '|' -%}
-        {%- assign pair_prices = block.settings.fallback_prices | split: '|' -%}
-        {%- for name in pair_names -%}
-          <a class="pdp-ritual__card" href="{{ routes.all_products_collection_url }}">
-            <div class="pdp-ritual__img pdp-ritual__img--placeholder" data-tone="{{ forloop.index }}">
-              <span class="pdp-ritual__tag">{{ pair_tags[forloop.index0] }}</span>
-            </div>
-            <div class="pdp-ritual__meta">
-              <span class="pdp-ritual__type">
-                {{ pair_types[forloop.index0] | upcase }} · {{ forloop.index | plus: 1 | prepend: '00' | slice: -3, 3 }}
-              </span>
-              <h3 class="pdp-ritual__name">{{ name }}</h3>
-              <span class="pdp-ritual__price">{{ pair_prices[forloop.index0] }}</span>
-            </div>
-          </a>
-        {%- endfor -%}
-      {%- endif -%}
+      <div
+        class="pdp-ritual__grid{% if is_carousel %} pdp-ritual__grid--carousel{% endif %}"
+        data-ritual-track
+      >
+        {%- if cards != blank -%}
+          {%- for c in cards -%}
+            {%- assign card_link = c.link.value | default: '#' -%}
+            <a class="pdp-ritual__card" href="{{ card_link }}">
+              <div class="pdp-ritual__img{% unless c.image.value %} pdp-ritual__img--placeholder{% endunless %}">
+                {%- if c.image.value -%}
+                  {{ c.image.value | image_url: width: 600 | image_tag: loading: 'lazy', alt: c.product_name.value }}
+                {%- endif -%}
+                {%- if c.category.value != blank -%}
+                  <span class="pdp-ritual__tag">{{ c.category.value | upcase }}</span>
+                {%- endif -%}
+              </div>
+              <div class="pdp-ritual__meta">
+                <span class="pdp-ritual__type">
+                  {{ c.category.value | upcase }} · {{ forloop.index | prepend: '00' | slice: -3, 3 }}
+                </span>
+                <h3 class="pdp-ritual__name">{{ c.product_name.value }}</h3>
+                <div class="pdp-ritual__price-row">
+                  {%- if c.price.value != blank -%}
+                    <span class="pdp-ritual__price">{{ c.price.value }}</span>
+                  {%- endif -%}
+                  {%- if c.compare_price.value != blank -%}
+                    <span class="pdp-ritual__compare">{{ c.compare_price.value }}</span>
+                  {%- endif -%}
+                </div>
+              </div>
+            </a>
+          {%- endfor -%}
+        {%- else -%}
+          {%- assign pair_types  = block.settings.fallback_types  | split: '|' -%}
+          {%- assign pair_tags   = block.settings.fallback_tags   | split: '|' -%}
+          {%- assign pair_names  = block.settings.fallback_names  | split: '|' -%}
+          {%- assign pair_prices = block.settings.fallback_prices | split: '|' -%}
+          {%- for name in pair_names -%}
+            <a class="pdp-ritual__card" href="{{ routes.all_products_collection_url }}">
+              <div class="pdp-ritual__img pdp-ritual__img--placeholder" data-tone="{{ forloop.index }}">
+                <span class="pdp-ritual__tag">{{ pair_tags[forloop.index0] }}</span>
+              </div>
+              <div class="pdp-ritual__meta">
+                <span class="pdp-ritual__type">
+                  {{ pair_types[forloop.index0] | upcase }} · {{ forloop.index | plus: 1 | prepend: '00' | slice: -3, 3 }}
+                </span>
+                <h3 class="pdp-ritual__name">{{ name }}</h3>
+                <span class="pdp-ritual__price">{{ pair_prices[forloop.index0] }}</span>
+              </div>
+            </a>
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .pdp-ritual__head-text { flex: 1; min-width: 0; }
+  .pdp-ritual__description {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--color-gray-600);
+    margin-top: 8px;
+    max-width: 60ch;
+  }
+  .pdp-ritual__head-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .pdp-ritual__nav { display: flex; gap: 8px; }
+  .pdp-ritual__nav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-text);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--transition-medium);
+  }
+  .pdp-ritual__nav-btn:hover { background: var(--color-gray-100); }
+
+  .pdp-ritual__grid--carousel {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    gap: 24px;
+    padding-bottom: 4px;
+  }
+  .pdp-ritual__grid--carousel::-webkit-scrollbar { display: none; }
+  .pdp-ritual__grid--carousel .pdp-ritual__card {
+    flex: 0 0 calc(25% - 18px);
+    scroll-snap-align: start;
+  }
+  @media (max-width: 900px) {
+    .pdp-ritual__grid--carousel .pdp-ritual__card { flex-basis: calc(50% - 12px); }
+  }
+  @media (max-width: 600px) {
+    .pdp-ritual__grid--carousel .pdp-ritual__card { flex-basis: 80%; }
+  }
+
+  .pdp-ritual__price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .pdp-ritual__compare {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-gray-500);
+    text-decoration: line-through;
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    function init() {
+      document.querySelectorAll('[data-ritual-track]').forEach(function (track) {
+        if (track.dataset.ritualInit === '1') return;
+        track.dataset.ritualInit = '1';
+        var wrap = track.closest('[data-ritual-wrap]');
+        if (!wrap) return;
+        var prev = wrap.querySelector('[data-ritual-prev]');
+        var next = wrap.querySelector('[data-ritual-next]');
+        function cardWidth() {
+          var first = track.querySelector('.pdp-ritual__card');
+          if (!first) return track.clientWidth;
+          var styles = getComputedStyle(track);
+          var gap = parseInt(styles.columnGap || styles.gap || '24', 10) || 24;
+          return first.getBoundingClientRect().width + gap;
+        }
+        if (prev) prev.addEventListener('click', function () {
+          track.scrollBy({ left: -cardWidth(), behavior: 'smooth' });
+        });
+        if (next) next.addEventListener('click', function () {
+          track.scrollBy({ left: cardWidth(), behavior: 'smooth' });
+        });
+      });
+    }
+    if (document.readyState !== 'loading') init();
+    else document.addEventListener('DOMContentLoaded', init);
+  })();
+{% endjavascript %}
 
 {% schema %}
 {
   "name": "t:pdp.ritual.name",
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_section",
+      "label": "t:pdp.ritual.enable_section_label",
+      "default": true
+    },
     {
       "type": "text",
       "id": "eyebrow",
@@ -81,6 +275,21 @@
       "id": "heading",
       "label": "t:labels.heading",
       "default": "Complete the ritual"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "t:pdp.ritual.description_label"
+    },
+    {
+      "type": "header",
+      "content": "t:pdp.ritual.view_all_header"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "t:pdp.ritual.show_view_all_label",
+      "default": true
     },
     {
       "type": "text",

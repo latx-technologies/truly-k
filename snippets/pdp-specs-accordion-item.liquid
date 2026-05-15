@@ -1,0 +1,53 @@
+{% doc %}
+  Renders the inner content of a single specifications accordion item: the
+  trigger button and the body (rich text or a two-column table).
+
+  The caller is responsible for the wrapping
+  `<div class="pdp-specs__item" data-accordion>` element so that both theme
+  blocks and metaobject-driven items share identical markup.
+
+  @param {string} heading - The accordion title
+  @param {string} content_type - 'text' or 'table'
+  @param {string} [text] - HTML/text body, used when content_type is 'text'
+  @param {string} [table_rows] - Newline-separated "Label | Value" rows, used when content_type is 'table'
+  @param {boolean} [open] - Whether the accordion starts expanded
+
+  @example
+  {% render 'pdp-specs-accordion-item',
+    heading: 'Ingredients',
+    content_type: 'text',
+    text: '<p>Squalane, Rosehip Seed Oil...</p>'
+  %}
+{% enddoc %}
+
+<button
+  type="button"
+  class="pdp-specs__head"
+  data-accordion-trigger
+  aria-expanded="{% if open %}true{% else %}false{% endif %}"
+>
+  <span class="pdp-specs__title">{{ heading }}</span>
+  <span class="pdp-specs__icon" aria-hidden="true"></span>
+</button>
+
+<div class="pdp-specs__body" data-accordion-body>
+  {%- if content_type == 'table' -%}
+    <table class="pdp-specs__table">
+      <tbody>
+        {%- assign table_lines = table_rows | split: '
+' -%}
+        {%- for line in table_lines -%}
+          {%- if line != blank -%}
+            {%- assign cells = line | split: '|' -%}
+            <tr>
+              <th scope="row">{{ cells[0] | strip }}</th>
+              <td>{{ cells[1] | strip }}</td>
+            </tr>
+          {%- endif -%}
+        {%- endfor -%}
+      </tbody>
+    </table>
+  {%- else -%}
+    <div class="pdp-specs__text">{{ text }}</div>
+  {%- endif -%}
+</div>

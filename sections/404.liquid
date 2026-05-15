@@ -5,19 +5,111 @@
   https://shopify.dev/docs/storefronts/themes/architecture/templates/404
 {% endcomment %}
 
-<h1>{{ '404.title' | t }}</h1>
+<div class="not-found" style="--padding-block: {{ section.settings.padding_block }}px">
+  <div class="not-found__inner">
+    {% if section.settings.image %}
+      <div class="not-found__image">
+        {{
+          section.settings.image
+          | image_url: width: 1000
+          | image_tag: loading: 'eager', sizes: '(min-width: 750px) 480px, 90vw', widths: '300, 480, 600, 1000'
+        }}
+      </div>
+    {% else %}
+      <div class="not-found__image not-found__image--placeholder">
+        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    {% endif %}
 
-<p>
-  {{ '404.not_found' | t }}
-</p>
+    <h1 class="not-found__title">
+      {{ section.settings.heading | default: '404.title' | t }}
+    </h1>
 
-<a href="{{ routes.all_products_collection_url }}">
-  {{ '404.back_to_shopping' | t }}
-</a>
+    <p class="not-found__text">
+      {{ section.settings.text | default: '404.not_found' | t }}
+    </p>
+
+    <a href="{{ routes.root_url }}" class="btn btn-primary not-found__button">
+      {{ section.settings.button_label | default: '404.back_to_home' | t }}
+    </a>
+  </div>
+</div>
+
+{% stylesheet %}
+  .not-found {
+    display: flex;
+    justify-content: center;
+    padding-block: var(--padding-block);
+    padding-inline: 1.5rem;
+  }
+  .not-found__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 540px;
+  }
+  .not-found__image {
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 2rem;
+  }
+  .not-found__image img,
+  .not-found__image svg {
+    width: 100%;
+    height: auto;
+  }
+  .not-found__image--placeholder svg {
+    opacity: 0.5;
+  }
+  .not-found__title {
+    margin: 0 0 0.75rem;
+    font-size: 2.5rem;
+  }
+  .not-found__text {
+    margin: 0 0 2rem;
+    font-size: 1.125rem;
+  }
+  .not-found__button:hover,
+  .not-found__button:focus-visible {
+    color: var(--color-black);
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.404",
-  "settings": []
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:labels.image"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "t:labels.text"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:404_settings.button_label"
+    },
+    {
+      "type": "range",
+      "id": "padding_block",
+      "label": "t:labels.padding",
+      "min": 20,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    }
+  ]
 }
 {% endschema %}

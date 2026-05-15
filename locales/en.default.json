@@ -9,9 +9,10 @@
  */
 {
   "404": {
-    "title": "404",
-    "not_found": "Page not found.",
-    "back_to_shopping": "Back to shopping"
+    "title": "Page not found",
+    "not_found": "The page you're looking for doesn't exist or may have been moved. Let's get you back on track.",
+    "back_to_shopping": "Back to shopping",
+    "back_to_home": "Go to homepage"
   },
   "blog": {
     "article_comments": "Comments",

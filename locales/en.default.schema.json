@@ -49,6 +49,7 @@
     "grid_gap": "Grid spacing",
     "grid_item_width": "Grid item width",
     "heading": "Heading",
+    "image": "Image",
     "input_corner_radius": "Input corner radius",
     "layout_direction": "Layout direction",
     "menu": "Menu",
@@ -107,6 +108,9 @@
     "collection_hero": "Collection hero",
     "main_collection": "Collection products",
     "main_cart": "Cart"
+  },
+  "404_settings": {
+    "button_label": "Button label"
   },
   "cart_settings": {
     "enable_note": "Enable order note",
@@ -258,11 +262,24 @@
   "pdp": {
     "specs": {
       "name": "PDP Specifications",
-      "fallback_header": "Fallback content",
-      "fallback_info": "Used when the product has no specs metafields set.",
-      "fallback_size_label": "Default size text",
-      "fallback_ingredients_label": "Default ingredients text",
-      "fallback_shipping_label": "Default shipping text"
+      "enable_section_label": "Show section",
+      "content_source_label": "Content source",
+      "content_source_info": "Auto uses the product's spec sections metafield when set, otherwise the accordion blocks below.",
+      "content_source_auto": "Auto (metafield, fallback to blocks)",
+      "content_source_blocks": "Accordion blocks only",
+      "description_label": "Description",
+      "spacing_header": "Layout",
+      "content_spacing_label": "Spacing",
+      "section_padding_label": "Section padding",
+      "accordion": {
+        "name": "Accordion item",
+        "open_by_default_label": "Open by default",
+        "content_type_label": "Content type",
+        "content_type_text": "Text",
+        "content_type_table": "Table",
+        "table_rows_label": "Table rows",
+        "table_rows_info": "One row per line. Separate label and value with a pipe (|)."
+      }
     },
     "howto": {
       "name": "PDP How to Use",
@@ -282,11 +299,15 @@
     },
     "ritual": {
       "name": "PDP Complete the Ritual",
-      "eyebrow_label": "Eyebrow",
+      "enable_section_label": "Show section",
+      "eyebrow_label": "Subtitle / eyebrow",
+      "description_label": "Description",
+      "view_all_header": "View all link",
+      "show_view_all_label": "Show \"View all\" link",
       "view_all_label": "View all label",
       "view_all_link": "View all link",
       "fallback_header": "Fallback cards",
-      "fallback_info": "Shown when the product has no pairs_with metafield entries.",
+      "fallback_info": "Shown when the product has no ritual_cards metafield entries.",
       "fallback_names_label": "Product names",
       "fallback_types_label": "Product types",
       "fallback_tags_label": "Image tags",

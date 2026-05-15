@@ -162,11 +162,23 @@
                             <div class="header-mega__grid">
                               {% if child_link.links.size > 0 %}
                                 {% for grandchild in child_link.links limit: 8 %}
-                                  {%- assign gc_collection = grandchild.object -%}
+                                  {%- liquid
+                                    assign gc_object = grandchild.object
+                                    assign gc_image = null
+                                    if grandchild.type == 'product_link' and gc_object.featured_image
+                                      assign gc_image = gc_object.featured_image
+                                    elsif grandchild.type == 'collection_link' and gc_object.image
+                                      assign gc_image = gc_object.image
+                                    elsif gc_object.featured_image
+                                      assign gc_image = gc_object.featured_image
+                                    elsif gc_object.image
+                                      assign gc_image = gc_object.image
+                                    endif
+                                  -%}
                                   <a href="{{ grandchild.url }}" class="header-mega__grid-item">
                                     <div class="header-mega__grid-image">
-                                      {% if gc_collection and gc_collection.image %}
-                                        {{ gc_collection.image | image_url: width: 300 | image_tag: loading: 'lazy' }}
+                                      {% if gc_image %}
+                                        {{ gc_image | image_url: width: 300 | image_tag: loading: 'lazy' }}
                                       {% else %}
                                         {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
                                       {% endif %}

@@ -1,18 +1,40 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
     "main": {
       "type": "product",
       "blocks": {
-        "specs": { "type": "pdp-specs", "settings": {} },
+        "specs": {
+          "type": "pdp-specs",
+          "blocks": {
+            "specs-1": {
+              "type": "pdp-specs-accordion",
+              "settings": {
+                "heading": "Specifications",
+                "open_by_default": true,
+                "content_type": "table",
+                "table_rows": "Brand | MOOD\nSkin type | All skin types\nSize | 30 ml"
+              }
+            },
+            "specs-2": {
+              "type": "pdp-specs-accordion",
+              "settings": {
+                "heading": "Ingredients",
+                "content_type": "text",
+                "text": "<p>Bakuchiol, Squalane, Rosehip Seed Oil, Jojoba Seed Oil, Evening Primrose Oil, Tocopherol (Vitamin E), Sea Buckthorn Extract, Calendula, Chamomile.</p>"
+              }
+            },
+            "specs-3": {
+              "type": "pdp-specs-accordion",
+              "settings": {
+                "heading": "Shipping & returns",
+                "content_type": "text",
+                "text": "<p>Complimentary standard shipping on orders over $75. Express and international options available at checkout. Returns accepted within 30 days of delivery.</p>"
+              }
+            }
+          },
+          "block_order": ["specs-1", "specs-2", "specs-3"],
+          "settings": {}
+        },
         "howto": { "type": "pdp-howto", "settings": {} },
         "reviews": { "type": "pdp-reviews", "settings": {} },
         "ritual": { "type": "pdp-ritual", "settings": {} }
@@ -21,7 +43,5 @@
       "settings": {}
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main"]
 }
