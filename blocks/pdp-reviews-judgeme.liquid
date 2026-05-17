@@ -1,0 +1,63 @@
+{% doc %}
+  Renders the Judge.me product review widget below the product info.
+
+  The `id="reviews"` anchor matches the `#reviews` link in the product title
+  area's star-rating row, so users can click the rating to jump here.
+
+  Judge.me's installed app JS auto-mounts any element with the
+  `jdgm-widget jdgm-review-widget` classes — no extra JS required.
+
+  @example
+  {% content_for 'block', type: 'pdp-reviews-judgeme', id: 'reviews' %}
+{% enddoc %}
+
+<section
+  id="reviews"
+  class="pdp-jdgm"
+  {{ block.shopify_attributes }}
+>
+  <div class="pdp__container">
+    {%- if block.settings.heading != blank -%}
+      <h2 class="pdp-jdgm__heading">{{ block.settings.heading }}</h2>
+    {%- endif -%}
+
+    <div
+      class="jdgm-widget jdgm-review-widget"
+      data-id="{{ product.id }}"
+      data-product-title="{{ product.title | escape }}"
+      data-product-handle="{{ product.handle }}"
+    ></div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .pdp-jdgm {
+    padding: 60px 0;
+    background-color: var(--color-white);
+  }
+  .pdp-jdgm__heading {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 500;
+    color: var(--color-black);
+    margin: 0 0 24px;
+  }
+  @media (max-width: 768px) {
+    .pdp-jdgm { padding: 40px 0; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:pdp.reviews.name",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Customer reviews"
+    }
+  ],
+  "presets": [{ "name": "t:pdp.reviews.name" }]
+}
+{% endschema %}

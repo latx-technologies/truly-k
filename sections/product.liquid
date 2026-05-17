@@ -133,19 +133,12 @@
           </div>
         {%- endif -%}
 
-        {%- assign rating_value = product.metafields.reviews.rating.value | default: 4.9 -%}
-        {%- assign rating_count = product.metafields.reviews.rating_count.value | default: 1248 -%}
-        <div class="pdp__rating">
-          <span class="pdp__stars" aria-label="{{ 'pdp.info.rated_out_of' | t: rating: rating_value }}">
-            {%- assign filled = rating_value | round -%}
-            {%- for i in (1..5) -%}
-              {%- if forloop.index0 < filled -%}★{%- else -%}☆{%- endif -%}
-            {%- endfor -%}
-          </span>
-          <a href="#reviews" class="pdp__rating-link">
-            {{ rating_value }} · {{ 'pdp.info.review_count' | t: count: rating_count }}
-          </a>
-        </div>
+        {%- assign jdgm_badge = product.metafields.judgeme.badge -%}
+        {%- if jdgm_badge != blank -%}
+          <div class="pdp__rating">
+            {{ jdgm_badge }}
+          </div>
+        {%- endif -%}
 
         <hr class="pdp__rule" />
 
