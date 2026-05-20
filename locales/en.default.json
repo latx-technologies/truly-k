@@ -291,6 +291,10 @@
     "quantity": "Quantity",
     "size_label": "Size"
   },
+  "faq": {
+    "aria_label": "Frequently asked questions",
+    "empty": "No FAQs have been selected for this page yet."
+  },
   "pdp": {
     "breadcrumb_label": "Breadcrumb",
     "breadcrumb_home": "Home",

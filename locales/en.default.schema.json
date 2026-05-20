@@ -109,6 +109,23 @@
     "main_collection": "Collection products",
     "main_cart": "Cart"
   },
+  "faq": {
+    "name": "FAQ",
+    "header_content": "Heading & description",
+    "header_faqs": "FAQ entries",
+    "header_view_all": "View all FAQs link",
+    "label_faqs": "FAQs to display",
+    "label_description": "Description",
+    "label_first_open": "Open the first FAQ by default",
+    "label_close_others": "Close other FAQs when one is opened",
+    "label_max_to_show": "Maximum FAQs to show",
+    "label_view_all_url": "View all FAQs link",
+    "label_view_all_label": "Button label",
+    "info_close_others": "When enabled, only one FAQ can be expanded at a time.",
+    "info_max_to_show": "Set to 0 to show every selected FAQ. Otherwise the rest are linked to your FAQ page via the button below.",
+    "info_view_all_url": "Leave empty to hide the button. Usually points to your dedicated FAQ page.",
+    "info_setup": "Create a metaobject definition named 'FAQ' (handle: faq) under Settings → Custom data with two fields: 'question' (Single line text) and 'answer' (Rich text). Then add entries and pick which ones to show below."
+  },
   "404_settings": {
     "button_label": "Button label"
   },
