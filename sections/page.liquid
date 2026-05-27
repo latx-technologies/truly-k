@@ -5,9 +5,21 @@
   https://shopify.dev/docs/storefronts/themes/architecture/templates/page
 {% endcomment %}
 
-<h1>{{ page.title }}</h1>
+<div class="page">
+  <div class="page__content rte">
+    {{ page.content }}
+  </div>
+</div>
 
-{{ page.content }}
+{% stylesheet %}
+  .page {
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 32px var(--container-padding, 24px) 64px;
+  }
+  .page__content > *:first-child { margin-top: 0; }
+  .page__content > *:last-child  { margin-bottom: 0; }
+{% endstylesheet %}
 
 {% schema %}
 {

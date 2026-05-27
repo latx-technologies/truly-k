@@ -209,9 +209,27 @@
     "empty_body": "This collection is empty for now. Check back soon or explore the full catalog.",
     "shop_all": "Shop all products"
   },
+  "collection_filters": {
+    "title": "Filters",
+    "show_filters": "Show filters",
+    "hide_filters": "Hide filters",
+    "clear_all": "Clear all",
+    "active_filters": "Active filters",
+    "remove_filter": "Remove filter: {{ label }}",
+    "price_from": "From",
+    "price_to": "To",
+    "apply": "Apply"
+  },
   "product_card": {
     "sold_out": "Sold out",
-    "from_price": "From {{ price }}"
+    "from_price": "From {{ price }}",
+    "quick_view": "Quick view",
+    "add_to_cart": "Add to cart",
+    "added": "Added",
+    "adding": "Adding…",
+    "choose_option": "Choose {{ option }}",
+    "view_details": "View full details",
+    "close": "Close"
   },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
@@ -237,6 +255,7 @@
     "account": "Account",
     "sign_in_register": "Sign in/ Register",
     "open_menu": "Open menu",
+    "close_menu": "Close menu",
     "main_navigation": "Main navigation",
     "trending_products": "Trending Products",
     "new_badge": "New"

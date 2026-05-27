@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Syne:wght@400;500;600;700&display=swap");
 /**
  * Theme – Design tokens (variables only).
  * Load this before global.css so components can reference these variables.
@@ -33,8 +34,19 @@
   /* -------------------------------------------------------------------------
      Typography – font families
      ------------------------------------------------------------------------- */
-  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-body: 'Syne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-body:
+    "Syne", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Dawn-compatible aliases — third-party apps read these standard variable
+     names. Declared here so they always match the theme's actual fonts above;
+     change --font-display / --font-body in one place and these follow. */
+  --font-heading-family: var(--font-display);
+  --font-heading-weight: 500;
+  --font-heading-style: normal;
+  --font-body-family: var(--font-body);
+  --font-body-weight: 400;
+  --font-body-style: normal;
 
   /* -------------------------------------------------------------------------
      Typography – font sizes (fluid scale)
@@ -79,10 +91,10 @@
 }
 
 @media (max-width: 1024px) {
-   :root {
-     --container-padding: 32px;
-   }
- }
+  :root {
+    --container-padding: 32px;
+  }
+}
 
 @media (max-width: 992px) {
   :root {
@@ -94,4 +106,50 @@
   :root {
     --container-padding: var(--container-padding-mobile);
   }
+}
+
+/* Load the same Google Fonts your theme uses */
+
+/* Body / general text -> Syne */
+body,
+p,
+input,
+textarea,
+select,
+label,
+.quiz-choice,
+button {
+  font-family:
+    "Syne",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif !important;
+}
+
+/* Headings / questions -> Cormorant Garamond */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family:
+    "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  font-weight: 500 !important;
+}
+
+/* Buttons — matched to your --btn-* and color tokens */
+.quiz-button [type="submit"],
+.quiz-button [type="button"] {
+  background-color: #000000 !important; /* --color-black */
+  color: #ffffff !important; /* --color-white */
+  border: 2px solid #000000 !important; /* --btn-border-width */
+  border-radius: 0 !important; /* --btn-radius */
+  padding: 18px 40px !important; /* --btn-padding-y / -x */
+  font-family: "Syne", sans-serif !important;
+  font-size: 0.875rem !important; /* --btn-font-size (text-sm) */
+  font-weight: 600 !important; /* --btn-font-weight */
+  letter-spacing: 0.1em !important; /* --btn-letter-spacing */
+  transition: 0.2s ease !important; /* --transition-fast */
 }
