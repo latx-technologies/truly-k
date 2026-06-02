@@ -158,7 +158,9 @@
   "collection_grid": {
     "products_per_page": "Products per page",
     "enable_sorting": "Show sort dropdown",
-    "show_vendor": "Show vendor instead of product type"
+    "show_vendor": "Show vendor instead of product type",
+    "enable_quick_add": "Enable quick add to cart",
+    "enable_quick_view": "Enable quick view modal"
   },
   "account_settings": {
     "intro_text": "Intro text",
